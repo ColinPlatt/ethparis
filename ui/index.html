@@ -5,6 +5,97 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <script>
+      let provider;
+      let accounts;
+      let connectedAccount;
+      function setDotColor(e) {
+        document.querySelector('.dot').style.backgroundColor = e;
+      }
+      document.addEventListener('DOMContentLoaded', function () {
+        provider = window.ethereum;
+        var t = document.querySelector('.connect-button'),
+          n = document.querySelector('.switch-button');
+        if (provider !== undefined) {
+          window.ethereum.request({ method: 'eth_requestAccounts' }),
+            ethereum
+              .request({ method: 'eth_accounts' })
+              .then(function (accounts) {
+                accounts.length === 0
+                  ? (setDotColor('red'), (t.style.display = 'block'), (n.style.display = 'none'))
+                  : ethereum
+                      .request({ method: 'eth_chainId' })
+                      .then(function (e) {
+                        if ('0x5' === e) {
+                          ethereum
+                            .enable()
+                            .then(function (accounts) {
+                              setDotColor('green');
+                              console.log(accounts);
+                              connectedAccount = accounts[0];
+                              n.style.display = 'none';
+                              t.innerText = 'Connected';
+                            })
+                            .catch(console.error);
+                        } else {
+                          setDotColor('red'), (t.style.display = 'none'), (n.style.display = 'block');
+                        }
+                      })
+                      .catch(console.error);
+              })
+              .catch(console.error);
+          t.addEventListener('click', function () {
+            ethereum
+              .request({ method: 'eth_requestAccounts' })
+              .then(function (accounts) {
+                if (accounts.length > 0) {
+                  setDotColor('green');
+                  t.innerText = 'Connected';
+                  n.style.display = 'none';
+                  connectedAccount = accounts[0];
+                } else {
+                  ethereum
+                    .enable()
+                    .then(function (accounts) {
+                      setDotColor('green');
+                      console.log(accounts);
+                      connectedAccount = accounts[0];
+                      n.style.display = 'none';
+                      t.innerText = 'Connected';
+                    })
+                    .catch(console.error);
+                }
+              })
+              .catch(console.error);
+          });
+          n.addEventListener('click', function () {
+            window.ethereum
+              .request({
+                method: 'wallet_addEthereumChain',
+                params: [
+                  {
+                    chainId: '0x5',
+                    chainName: 'Goerli',
+                    rpcUrls: ['https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161'],
+                    blockExplorerUrls: ['https://goerli.etherscan.io/'],
+                    nativeCurrency: {
+                      name: 'Goerli ETH',
+                      symbol: 'ETH',
+                      decimals: 18,
+                    },
+                  },
+                ],
+              })
+              .then(function () {
+                n.style.display = 'none';
+                setDotColor('green');
+              })
+              .catch(console.error);
+          });
+        }
+      });
+    </script>
+    <script>
+      const CONTRACT = '0x94c16a950d0e044ef12bbc1705c237d89474be5b';
       var slots = [
         [0, 0, 0, 1],
         [0, 0, 0, 1],
@@ -86,9 +177,159 @@
         }
       }
     </script>
+    <script>
+      function createWavFile(samples, sampleRate) {
+        const byteRate = sampleRate * 1;
+        const dataSize = samples.length;
+        const buffer = new ArrayBuffer(44 + dataSize);
+        const view = new DataView(buffer);
+
+        view.setUint32(0, 0x52494646, false);
+        view.setUint32(4, 36 + dataSize, true);
+        view.setUint32(8, 0x57415645, false);
+        view.setUint32(12, 0x666d7420, false);
+        view.setUint32(16, 16, true);
+        view.setUint16(20, 1, true);
+        view.setUint16(22, 1, true);
+        view.setUint32(24, sampleRate, true);
+        view.setUint32(28, byteRate, true);
+        view.setUint16(32, 1, true);
+        view.setUint16(34, 8, true);
+        view.setUint32(36, 0x64617461, false);
+        view.setUint32(40, dataSize, true);
+
+        for (let i = 0, stride = 44; i < dataSize; i++, stride++) {
+          view.setUint8(stride, samples[i]);
+        }
+
+        return buffer;
+      }
+
+      function hexStringToUint8Array(hexString) {
+        const numPairs = hexString.length / 2;
+        const uintArray = new Uint8Array(numPairs);
+
+        for (let i = 0; i < numPairs; i++) {
+          const hexPair = hexString.substr(i * 2, 2);
+          uintArray[i] = parseInt(hexPair, 16);
+        }
+
+        return uintArray;
+      }
+
+      const samples = hexStringToUint8Array(samplesStr);
+      const sampleRate = 8000;
+
+      console.log(samples);
+
+      const wavFile = createWavFile(samples, sampleRate);
+
+      const blob = new Blob([wavFile], { type: 'audio/wav' });
+      const url = URL.createObjectURL(blob);
+
+      const player = document.getElementById('player');
+      player.src = url;
+      player.play();
+
+      document.addEventListener('DOMContentLoaded', (event) => {
+        const updateButton = document.getElementById('update-btn');
+        console.log(updateButton);
+
+        updateButton.addEventListener('click', async function () {
+          if (connectedAccount == undefined) {
+            alert('Please connect your wallet first');
+          } else {
+            const txnHash = await ethereum.request({
+              method: 'eth_call',
+              params: [
+                {
+                  from: connectedAccount,
+                  to: CONTRACT,
+                  data: '0x20c50d810000000000000000000000000000000000000000000000000000000000000001',
+                },
+              ],
+            });
+            console.log('txnHash', txnHash);
+          }
+        });
+      });
+    </script>
+    <script>
+      document.addEventListener('DOMContentLoaded', (event) => {
+        const updateButton = document.getElementById('update-btn');
+        console.log(updateButton);
+
+        updateButton.addEventListener('click', async function () {
+          if (connectedAccount == undefined) {
+            alert('Please connect your wallet first');
+          } else {
+            const txnHash = await ethereum.request({
+              method: 'eth_call',
+              params: [
+                {
+                  from: connectedAccount,
+                  to: CONTRACT,
+                  data: '0x20c50d810000000000000000000000000000000000000000000000000000000000000001',
+                },
+              ],
+            });
+            console.log('txnHash', txnHash);
+          }
+        });
+      });
+      //const mintButton = document.getElementById("mint-btn");
+      // document.getElementById('mint-btn').addEventListener('click', async function () {
+      //   if (connectedAccount == undefined) {
+      //     alert('Please connect your wallet first');
+      //   } else {
+      //     const balance = await ethereum.request({
+      //       method: 'eth_call',
+      //       params: [
+      //         {
+      //           to: '0x328c6c75cc6b0d97f6061f4b4988a1b16eb65362',
+      //           data: '0x76ff704e000000000000000000000000d8916482b847ee55e7467b2c13587d1551ed987d',
+      //         },
+      //         'latest',
+      //       ],
+      //     });
+      //     console.log('balance:', balance);
+      //     if (BigInt(balance) >= BigInt('0x0de0b6b3a7640000')) {
+      //       const txnHash = await ethereum.request({
+      //         method: 'eth_sendTransaction',
+      //         params: [
+      //           {
+      //             from: connectedAccount,
+      //             to: '0x1dc05fbf9db32e909889859c9192afd2b30fa814',
+      //             value: '0x5af3107a4000',
+      //             data: '0xdc297923',
+      //           },
+      //         ],
+      //       });
+      //       const receipt = await new Promise((resolve) => {
+      //         const interval = setInterval(async () => {
+      //           const receipt = await ethereum.request({ method: 'eth_getTransactionReceipt', params: [txnHash] });
+      //           if (receipt) {
+      //             clearInterval(interval);
+      //             resolve(receipt);
+      //           }
+      //         }, 5000);
+      //       });
+      //       alert('Transaction complete! You can view it here: https://goerli.etherscan.io/tx/' + txnHash);
+      //     }
+      //   }
+      // });
+    </script>
     <style>
       body {
         font-family: 'Helvetica', sans-serif;
+      }
+      .dot {
+        height: 10px;
+        width: 10px;
+        background-color: red;
+        border-radius: 50%;
+        margin-top: 10px;
+        margin-right: 5px;
       }
 
       .timeline {
@@ -129,6 +370,9 @@
     </style>
   </head>
   <body>
+    <div class="dot"></div>
+    <button class="connect-button">Connect Wallet</button>
+    <button class="switch-button">Switch Networks</button>
     <div class="title">
       <h1>Timeline</h1>
     </div>
@@ -203,5 +447,7 @@
         <td class="sample-9"></td>
       </tr>
     </table>
+
+    <button id="update-btn">Update</button>
   </body>
 </html>
