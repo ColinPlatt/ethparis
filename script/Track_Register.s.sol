@@ -20,3 +20,5 @@ contract TrackScript is Script {
 
 //forge script script/Track_Register.s.sol:TrackScript --rpc-url $RPC_URL --broadcast --slow --verify -vvvv
 
+//forge verify-contract 0x94c16a950d0e044ef12bbc1705c237d89474be5b src/Track_Register:Track_Register.sol --verifier etherscan --chain-id 5 --watch
+

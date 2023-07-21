@@ -19,4 +19,12 @@ contract Track_RegisterTests is Test {
         assertEq(res, Elements.arabic());
     }
 
+    function testCall() public {
+
+        bytes memory call = abi.encodeWithSignature("playElement(uint8)", uint8(1));
+
+        emit log_bytes(call);
+
+    }
+
 }
