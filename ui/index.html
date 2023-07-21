@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      var slots = [
+        [0, 0, 0, 1],
+        [0, 0, 0, 1],
+        [0, 0, 0, 1],
+        [0, 0, 0, 1],
+        [0, 0, 0, 1],
+        [0, 0, 0, 1],
+        [0, 0, 0, 1],
+        [0, 0, 0, 1],
+        [0, 0, 0, 1],
+        [0, 0, 0, 1],
+      ];
+      var samples = [{ idx: 1, name: 'Drums' }];
+      document.addEventListener('DOMContentLoaded', (event) => {
+        for (var i = 0; i < slots.length; i++) {
+          for (var j = 0; j < slots[i].length; j++) {
+            var slot = slots[i][j];
+            var track = document.querySelector('.track-' + j);
+            var slotEl = track.querySelector('.slot-' + i);
+            if (slot !== 0) {
+              for (var k = 0; k < samples.length; k++) {
+                if (samples[k].idx === slot) {
+                  slotEl.textContent = samples[k].name;
+                  break;
+                }
+              }
+            }
+          }
+        }
+
+        addSamples();
+
+        var selectedSampleIdx = null;
+
+        var sampleCells = document.querySelectorAll('.samples td');
+        sampleCells.forEach((cell) => {
+          cell.addEventListener('click', (event) => {
+            // Remove the 'selected' class from all sample cells
+            sampleCells.forEach((cell) => {
+              cell.classList.remove('selected');
+            });
+
+            // Add the 'selected' class to the clicked sample cell
+            event.target.classList.add('selected');
+
+            selectedSampleIdx = event.target.dataset.sampleIdx;
+          });
+        });
+
+        var timelineSlots = document.querySelectorAll('.timeline td');
+        timelineSlots.forEach((cell) => {
+          cell.addEventListener('click', (event) => {
+            if (selectedSampleIdx !== null) {
+              var selectedSample = samples.find((sample) => sample.idx.toString() === selectedSampleIdx);
+              if (selectedSample) {
+                if (event.target.textContent === selectedSample.name) {
+                  // If the clicked slot is already occupied by the selected sample, unoccupy it
+                  event.target.textContent = '';
+                  event.target.classList.remove('occupied');
+                } else {
+                  // Otherwise, occupy the slot with the selected sample
+                  event.target.textContent = selectedSample.name;
+                  event.target.classList.add('occupied');
+                }
+              }
+            }
+          });
+        });
+      });
+
+      function addSamples() {
+        for (var i = 0; i < samples.length; i++) {
+          // Select the cell corresponding to this sample
+          var cell = document.querySelector('.sample-' + i);
+
+          // Assign the name attribute of the sample to the cell's inner text
+          cell.textContent = samples[i].name;
+          cell.dataset.sampleIdx = samples[i].idx; // Add the sample's idx to the cell's dataset
+        }
+      }
+    </script>
+    <style>
+      body {
+        font-family: 'Helvetica', sans-serif;
+      }
+
+      .timeline {
+        width: 1200px;
+        margin: auto;
+      }
+
+      td[class^='slot-'] {
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        width: 120px;
+        height: 40px;
+      }
+
+      .samples {
+        display: flex;
+        width: 1200px;
+      }
+
+      td[class^='sample-'] {
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        width: 120px;
+        height: 40px;
+      }
+      div[class^='track-'] {
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);
+      }
+
+      .selected {
+        background-color: yellow !important;
+      }
+
+      .occupied {
+        background-color: lightgreen !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="title">
+      <h1>Timeline</h1>
+    </div>
+    <table class="timeline">
+      <tr class="track-0">
+        <td class="slot-0"></td>
+        <td class="slot-1"></td>
+        <td class="slot-2"></td>
+        <td class="slot-3"></td>
+        <td class="slot-4"></td>
+        <td class="slot-5"></td>
+        <td class="slot-6"></td>
+        <td class="slot-7"></td>
+        <td class="slot-8"></td>
+        <td class="slot-9"></td>
+      </tr>
+      <tr class="track-1">
+        <td class="slot-0"></td>
+        <td class="slot-1"></td>
+        <td class="slot-2"></td>
+        <td class="slot-3"></td>
+        <td class="slot-4"></td>
+        <td class="slot-5"></td>
+        <td class="slot-6"></td>
+        <td class="slot-7"></td>
+        <td class="slot-8"></td>
+        <td class="slot-9"></td>
+      </tr>
+      <tr class="track-2">
+        <td class="slot-0"></td>
+        <td class="slot-1"></td>
+        <td class="slot-2"></td>
+        <td class="slot-3"></td>
+        <td class="slot-4"></td>
+        <td class="slot-5"></td>
+        <td class="slot-6"></td>
+        <td class="slot-7"></td>
+        <td class="slot-8"></td>
+        <td class="slot-9"></td>
+      </tr>
+      <tr class="track-3">
+        <td class="slot-0"></td>
+        <td class="slot-1"></td>
+        <td class="slot-2"></td>
+        <td class="slot-3"></td>
+        <td class="slot-4"></td>
+        <td class="slot-5"></td>
+        <td class="slot-6"></td>
+        <td class="slot-7"></td>
+        <td class="slot-8"></td>
+        <td class="slot-9"></td>
+      </tr>
+    </table>
+
+    <div class="title">
+      <h1>Samples</h1>
+    </div>
+    <div class="description">
+      <p>Click on a sample to select it, then click on a slot on the timeline to assign it to that slot.</p>
+    </div>
+    <table class="samples">
+      <tr>
+        <td class="sample-0"></td>
+        <td class="sample-1"></td>
+        <td class="sample-2"></td>
+        <td class="sample-3"></td>
+        <td class="sample-4"></td>
+        <td class="sample-5"></td>
+        <td class="sample-6"></td>
+        <td class="sample-7"></td>
+        <td class="sample-8"></td>
+        <td class="sample-9"></td>
+      </tr>
+    </table>
+  </body>
+</html>
