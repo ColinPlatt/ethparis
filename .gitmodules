@@ -7,3 +7,6 @@
 [submodule "lib/libAudio"]
 	path = lib/libAudio
 	url = https://github.com/ColinPlatt/libAudio
+[submodule "lib/ethers.sol"]
+	path = lib/ethers.sol
+	url = https://github.com/ColinPlatt/ethers.sol
