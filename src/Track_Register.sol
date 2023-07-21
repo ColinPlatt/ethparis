@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
 
-contract Counter {
+contract Track_Register {
     uint256 public number;
 
     function setNumber(uint256 newNumber) public {
