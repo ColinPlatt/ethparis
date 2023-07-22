@@ -24,9 +24,11 @@ contract TrackScripts {
 
         _createWavFile(s);
         _hexStringToUint8Array(s);
-        //_callSamples(s);
+        _hextToString(s);
         _writePayloads(s);
         _fetchPayloads(s);
+        _writeNamePayloads(s);
+        _fetchNamePayloads(s);
         _onload(s);
 
         return s.content;
@@ -94,8 +96,41 @@ contract TrackScripts {
 
     }
 
-    function _writeSampleTransaction(uint8 index) internal view returns (string memory) {
+    function _hextToString(STATE memory _s) internal pure {
+        /*function hexToString(hex) {
+            var arr = hex.match(/.{1,2}/g); // Split hex string into array of 2-char groups
+            var str = '';
+            for(var i = 0; i < arr.length; i++) {
+                str += String.fromCharCode(parseInt(arr[i], 16)); // Convert each group into a character
+            }
+            return str;
+        }*/
 
+        fn memory _fn;
+
+        _fn.initializeNamedArgsFn("hexToString", 'hexStr');
+        _fn.openBodyFn();
+        _fn.appendFn('hexStr = hexStr.substr(2);');
+        //_fn.appendFn('hexStr = hexStr.replace(/^00+/, ''); ');
+        _fn.appendFn('var arr = hexStr.match(/.{1,2}/g);');
+        _fn.appendFn('var str = "";');
+        _fn.appendFn('let first = 0;');
+        _fn.appendFn(
+            _forLoop(
+                'i', 
+                'arr.length', 
+                'let parsedInt = parseInt(arr[i], 16); if(parsedInt !== 0) { if(first <2) { first++; } else {str += String.fromCharCode(parsedInt);}}'
+            )
+        );
+        _fn.appendFn('return str;');
+        _fn.closeBodyFn();
+
+        _s.content = LibString.concat(_s.content, _fn.readFn());
+
+
+    }
+
+    function _writeSampleTransaction(uint8 index) internal view returns (string memory) {
         return _getFormedTansaction(
             trackAddr,
             LibString.toHexString(abi.encodeWithSignature(
@@ -103,8 +138,18 @@ contract TrackScripts {
                 index
             ))
         );
-
     }
+
+    function _writeNameTransaction(uint8 index) internal view returns (string memory) {
+        return _getFormedTansaction(
+            trackAddr,
+            LibString.toHexString(abi.encodeWithSignature(
+                "elementName(uint8)",
+                index
+            ))
+        );
+    }
+    
 
     function _writePayloads(STATE memory _s) internal view returns (string memory payloads) {
 
@@ -113,6 +158,19 @@ contract TrackScripts {
         unchecked {
             for(uint i = 0; i<10; ++i) {
                 payloads = string.concat(payloads, i==0?"" :", ", _writeSampleTransaction(uint8(i+1)));
+            }
+        }
+
+        _s.content = string.concat(_s.content, payloads, "];");
+    }
+
+    function _writeNamePayloads(STATE memory _s) internal view returns (string memory payloads) {
+
+        payloads = "const name_payloads = [";
+
+        unchecked {
+            for(uint i = 0; i<10; ++i) {
+                payloads = string.concat(payloads, i==0?"" :", ", _writeNameTransaction(uint8(i+1)));
             }
         }
 
@@ -146,6 +204,33 @@ contract TrackScripts {
         _s.content = LibString.concat(_s.content, _fn.readFn());
     }
 
+    function _fetchNamePayloads(STATE memory _s) internal view {
+
+        fn memory _fn;
+
+        _fn.initializeNamedFn("fetchNamePayloads");
+        _fn.asyncFn();
+        _fn.prependFn("let elementNames = []; ");
+
+        _fn.openBodyFn();
+            _fn.appendFn(
+                _forLoop(
+                    "i", 
+                    "name_payloads.length", 
+                    string.concat(
+                        "elementNames.push(hexToString(await ",
+                        libBrowserProvider.ethereum_request(libJsonRPCProvider.eth_call("name_payloads[i]", libJsonRPCProvider.blockTag.latest)),
+                        "));"
+                    )
+                )
+            );
+
+            _fn.appendFn("console.log(elementNames); ");
+        _fn.closeBodyFn();
+
+        _s.content = LibString.concat(_s.content, _fn.readFn());
+    }
+
     function _updateBtnClick() internal view returns (string memory) {
         fn memory _fn;
 
@@ -172,7 +257,7 @@ contract TrackScripts {
         _fn.prependArrowFn("document.addEventListener('DOMContentLoaded', ");
         _fn.openBodyArrowFn();
         _fn.appendArrowFn("const updateButton = document.getElementById('update-btn'); console.log(updateButton);");
-        _fn.appendArrowFn('await fetchPayloads();');
+        _fn.appendArrowFn('await fetchPayloads(); await fetchNamePayloads();');
 
         _fn.appendArrowFn("});");
 
