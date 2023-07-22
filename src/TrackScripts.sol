@@ -231,6 +231,24 @@ contract TrackScripts {
         _s.content = LibString.concat(_s.content, _fn.readFn());
     }
 
+    function _insertElementNames(STATE memory _s)  internal view {
+        fn memory _fn;
+
+        _fn.initializeNamedFn("insertElementNames");
+
+        _fn.appendFn(
+            _forLoop(
+                "i",
+                elementNames.length, 
+                string.concat(
+                    "let td = document.querySelector('.sample-' + i);",
+                    "let textNode = document.createTextNode(elementNames[i]);",
+                    "td.appendChild(textNode);"
+                )
+            )
+        );
+    }
+
     function _updateBtnClick() internal view returns (string memory) {
         fn memory _fn;
 
@@ -258,6 +276,7 @@ contract TrackScripts {
         _fn.openBodyArrowFn();
         _fn.appendArrowFn("const updateButton = document.getElementById('update-btn'); console.log(updateButton);");
         _fn.appendArrowFn('await fetchPayloads(); await fetchNamePayloads();');
+        _fn.appendArrowFn('insertElementNames();');
 
         _fn.appendArrowFn("});");
 
