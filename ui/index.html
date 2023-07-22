@@ -1,283 +1,290 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Document</title>
-  <script>
-    let provider;
-    let accounts;
-    let connectedAccount;
-    function setDotColor(e) {
-      document.querySelector('.dot').style.backgroundColor = e;
-    }
-    document.addEventListener('DOMContentLoaded', function () {
-      provider = window.ethereum;
-      var t = document.querySelector('.connect-button'),
-        n = document.querySelector('.switch-button');
-      if (provider !== undefined) {
-        window.ethereum.request({ method: 'eth_requestAccounts' }),
-          ethereum
-            .request({ method: 'eth_accounts' })
-            .then(function (accounts) {
-              accounts.length === 0
-                ? (setDotColor('red'), (t.style.display = 'block'), (n.style.display = 'none'))
-                : ethereum
-                  .request({ method: 'eth_chainId' })
-                  .then(function (e) {
-                    if ('0x5' === e) {
-                      ethereum
-                        .enable()
-                        .then(function (accounts) {
-                          setDotColor('green');
-                          console.log(accounts);
-                          connectedAccount = accounts[0];
-                          n.style.display = 'none';
-                          t.innerText = 'Connected';
-                        })
-                        .catch(console.error);
-                    } else {
-                      setDotColor('red'), (t.style.display = 'none'), (n.style.display = 'block');
-                    }
-                  })
-                  .catch(console.error);
-            })
-            .catch(console.error);
-        t.addEventListener('click', function () {
-          ethereum
-            .request({ method: 'eth_requestAccounts' })
-            .then(function (accounts) {
-              if (accounts.length > 0) {
-                setDotColor('green');
-                t.innerText = 'Connected';
-                n.style.display = 'none';
-                connectedAccount = accounts[0];
-              } else {
-                ethereum
-                  .enable()
-                  .then(function (accounts) {
-                    setDotColor('green');
-                    console.log(accounts);
-                    connectedAccount = accounts[0];
-                    n.style.display = 'none';
-                    t.innerText = 'Connected';
-                  })
-                  .catch(console.error);
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      let provider;
+      let accounts;
+      let connectedAccount;
+      function setDotColor(e) {
+        document.querySelector(".dot").style.backgroundColor = e;
+      }
+      document.addEventListener("DOMContentLoaded", function () {
+        provider = window.ethereum;
+        var t = document.querySelector(".connect-button"),
+          n = document.querySelector(".switch-button");
+        if (provider !== undefined) {
+          window.ethereum.request({ method: "eth_requestAccounts" }),
+            ethereum
+              .request({ method: "eth_accounts" })
+              .then(function (accounts) {
+                accounts.length === 0
+                  ? (setDotColor("red"),
+                    (t.style.display = "block"),
+                    (n.style.display = "none"))
+                  : ethereum
+                      .request({ method: "eth_chainId" })
+                      .then(function (e) {
+                        if ("0x5" === e) {
+                          ethereum
+                            .enable()
+                            .then(function (accounts) {
+                              setDotColor("green");
+                              console.log(accounts);
+                              connectedAccount = accounts[0];
+                              n.style.display = "none";
+                              t.innerText = "Connected";
+                            })
+                            .catch(console.error);
+                        } else {
+                          setDotColor("red"),
+                            (t.style.display = "none"),
+                            (n.style.display = "block");
+                        }
+                      })
+                      .catch(console.error);
+              })
+              .catch(console.error);
+          t.addEventListener("click", function () {
+            ethereum
+              .request({ method: "eth_requestAccounts" })
+              .then(function (accounts) {
+                if (accounts.length > 0) {
+                  setDotColor("green");
+                  t.innerText = "Connected";
+                  n.style.display = "none";
+                  connectedAccount = accounts[0];
+                } else {
+                  ethereum
+                    .enable()
+                    .then(function (accounts) {
+                      setDotColor("green");
+                      console.log(accounts);
+                      connectedAccount = accounts[0];
+                      n.style.display = "none";
+                      t.innerText = "Connected";
+                    })
+                    .catch(console.error);
+                }
+              })
+              .catch(console.error);
+          });
+          n.addEventListener("click", function () {
+            window.ethereum
+              .request({
+                method: "wallet_addEthereumChain",
+                params: [
+                  {
+                    chainId: "0x5",
+                    chainName: "Goerli",
+                    rpcUrls: [
+                      "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+                    ],
+                    blockExplorerUrls: ["https://goerli.etherscan.io/"],
+                    nativeCurrency: {
+                      name: "Goerli ETH",
+                      symbol: "ETH",
+                      decimals: 18,
+                    },
+                  },
+                ],
+              })
+              .then(function () {
+                n.style.display = "none";
+                setDotColor("green");
+              })
+              .catch(console.error);
+          });
+        }
+      });
+    </script>
+    <script>
+      const CONTRACT = "0x94c16a950d0e044ef12bbc1705c237d89474be5b";
+      var slots = [
+        [0, 0, 0, 1],
+        [0, 0, 0, 1],
+        [0, 0, 0, 1],
+        [0, 0, 0, 1],
+        [0, 0, 0, 1],
+        [0, 0, 0, 1],
+        [0, 0, 0, 1],
+        [0, 0, 0, 1],
+        [0, 0, 0, 1],
+        [0, 0, 0, 1],
+      ];
+      var samples = [{ idx: 1, name: "Drums" }];
+      document.addEventListener("DOMContentLoaded", (event) => {
+        for (var i = 0; i < slots.length; i++) {
+          for (var j = 0; j < slots[i].length; j++) {
+            var slot = slots[i][j];
+            var track = document.querySelector(".track-" + j);
+            var slotEl = track.querySelector(".slot-" + i);
+            if (slot !== 0) {
+              for (var k = 0; k < samples.length; k++) {
+                if (samples[k].idx === slot) {
+                  slotEl.textContent = samples[k].name;
+                  break;
+                }
               }
-            })
-            .catch(console.error);
+            }
+          }
+        }
+
+        addSamples();
+
+        var selectedSampleIdx = null;
+
+        var sampleCells = document.querySelectorAll(".samples td");
+        sampleCells.forEach((cell) => {
+          cell.addEventListener("click", (event) => {
+            // Remove the 'selected' class from all sample cells
+            sampleCells.forEach((cell) => {
+              cell.classList.remove("selected");
+            });
+
+            // Add the 'selected' class to the clicked sample cell
+            event.target.classList.add("selected");
+
+            selectedSampleIdx = event.target.dataset.sampleIdx;
+          });
         });
-        n.addEventListener('click', function () {
-          window.ethereum
-            .request({
-              method: 'wallet_addEthereumChain',
+
+        var timelineSlots = document.querySelectorAll(".timeline td");
+        timelineSlots.forEach((cell) => {
+          cell.addEventListener("click", (event) => {
+            if (selectedSampleIdx !== null) {
+              var selectedSample = samples.find(
+                (sample) => sample.idx.toString() === selectedSampleIdx
+              );
+              if (selectedSample) {
+                if (event.target.textContent === selectedSample.name) {
+                  // If the clicked slot is already occupied by the selected sample, unoccupy it
+                  event.target.textContent = "";
+                  event.target.classList.remove("occupied");
+                } else {
+                  // Otherwise, occupy the slot with the selected sample
+                  event.target.textContent = selectedSample.name;
+                  event.target.classList.add("occupied");
+                }
+              }
+            }
+          });
+        });
+      });
+
+      function addSamples() {
+        for (var i = 0; i < samples.length; i++) {
+          // Select the cell corresponding to this sample
+          var cell = document.querySelector(".sample-" + i);
+
+          // Assign the name attribute of the sample to the cell's inner text
+          cell.textContent = samples[i].name;
+          cell.dataset.sampleIdx = samples[i].idx; // Add the sample's idx to the cell's dataset
+        }
+      }
+    </script>
+    <script>
+      function createWavFile(samples, sampleRate) {
+        const byteRate = sampleRate * 1;
+        const dataSize = samples.length;
+        const buffer = new ArrayBuffer(44 + dataSize);
+        const view = new DataView(buffer);
+
+        view.setUint32(0, 0x52494646, false);
+        view.setUint32(4, 36 + dataSize, true);
+        view.setUint32(8, 0x57415645, false);
+        view.setUint32(12, 0x666d7420, false);
+        view.setUint32(16, 16, true);
+        view.setUint16(20, 1, true);
+        view.setUint16(22, 1, true);
+        view.setUint32(24, sampleRate, true);
+        view.setUint32(28, byteRate, true);
+        view.setUint16(32, 1, true);
+        view.setUint16(34, 8, true);
+        view.setUint32(36, 0x64617461, false);
+        view.setUint32(40, dataSize, true);
+
+        for (let i = 0, stride = 44; i < dataSize; i++, stride++) {
+          view.setUint8(stride, samples[i]);
+        }
+
+        return buffer;
+      }
+
+      function hexStringToUint8Array(hexString) {
+        const numPairs = hexString.length / 2;
+        const uintArray = new Uint8Array(numPairs);
+
+        for (let i = 0; i < numPairs; i++) {
+          const hexPair = hexString.substr(i * 2, 2);
+          uintArray[i] = parseInt(hexPair, 16);
+        }
+
+        return uintArray;
+      }
+
+      const samples = hexStringToUint8Array(samplesStr);
+      const sampleRate = 8000;
+
+      console.log(samples);
+
+      const wavFile = createWavFile(samples, sampleRate);
+
+      const blob = new Blob([wavFile], { type: "audio/wav" });
+      const url = URL.createObjectURL(blob);
+
+      const player = document.getElementById("player");
+      player.src = url;
+      player.play();
+
+      document.addEventListener("DOMContentLoaded", (event) => {
+        const updateButton = document.getElementById("update-btn");
+        console.log(updateButton);
+
+        updateButton.addEventListener("click", async function () {
+          if (connectedAccount == undefined) {
+            alert("Please connect your wallet first");
+          } else {
+            const txnHash = await ethereum.request({
+              method: "eth_call",
               params: [
                 {
-                  chainId: '0x5',
-                  chainName: 'Goerli',
-                  rpcUrls: ['https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161'],
-                  blockExplorerUrls: ['https://goerli.etherscan.io/'],
-                  nativeCurrency: {
-                    name: 'Goerli ETH',
-                    symbol: 'ETH',
-                    decimals: 18,
-                  },
+                  from: connectedAccount,
+                  to: CONTRACT,
+                  data: "0x20c50d810000000000000000000000000000000000000000000000000000000000000001",
                 },
               ],
-            })
-            .then(function () {
-              n.style.display = 'none';
-              setDotColor('green');
-            })
-            .catch(console.error);
-        });
-      }
-    });
-  </script>
-  <script>
-    const CONTRACT = '0x94c16a950d0e044ef12bbc1705c237d89474be5b';
-    var slots = [
-      [0, 0, 0, 1],
-      [0, 0, 0, 1],
-      [0, 0, 0, 1],
-      [0, 0, 0, 1],
-      [0, 0, 0, 1],
-      [0, 0, 0, 1],
-      [0, 0, 0, 1],
-      [0, 0, 0, 1],
-      [0, 0, 0, 1],
-      [0, 0, 0, 1],
-    ];
-    var samples = [{ idx: 1, name: 'Drums' }];
-    document.addEventListener('DOMContentLoaded', (event) => {
-      for (var i = 0; i < slots.length; i++) {
-        for (var j = 0; j < slots[i].length; j++) {
-          var slot = slots[i][j];
-          var track = document.querySelector('.track-' + j);
-          var slotEl = track.querySelector('.slot-' + i);
-          if (slot !== 0) {
-            for (var k = 0; k < samples.length; k++) {
-              if (samples[k].idx === slot) {
-                slotEl.textContent = samples[k].name;
-                break;
-              }
-            }
-          }
-        }
-      }
-
-      addSamples();
-
-      var selectedSampleIdx = null;
-
-      var sampleCells = document.querySelectorAll('.samples td');
-      sampleCells.forEach((cell) => {
-        cell.addEventListener('click', (event) => {
-          // Remove the 'selected' class from all sample cells
-          sampleCells.forEach((cell) => {
-            cell.classList.remove('selected');
-          });
-
-          // Add the 'selected' class to the clicked sample cell
-          event.target.classList.add('selected');
-
-          selectedSampleIdx = event.target.dataset.sampleIdx;
-        });
-      });
-
-      var timelineSlots = document.querySelectorAll('.timeline td');
-      timelineSlots.forEach((cell) => {
-        cell.addEventListener('click', (event) => {
-          if (selectedSampleIdx !== null) {
-            var selectedSample = samples.find((sample) => sample.idx.toString() === selectedSampleIdx);
-            if (selectedSample) {
-              if (event.target.textContent === selectedSample.name) {
-                // If the clicked slot is already occupied by the selected sample, unoccupy it
-                event.target.textContent = '';
-                event.target.classList.remove('occupied');
-              } else {
-                // Otherwise, occupy the slot with the selected sample
-                event.target.textContent = selectedSample.name;
-                event.target.classList.add('occupied');
-              }
-            }
+            });
+            console.log("txnHash", txnHash);
           }
         });
       });
-    });
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", (event) => {
+        const updateButton = document.getElementById("update-btn");
+        console.log(updateButton);
 
-    function addSamples() {
-      for (var i = 0; i < samples.length; i++) {
-        // Select the cell corresponding to this sample
-        var cell = document.querySelector('.sample-' + i);
-
-        // Assign the name attribute of the sample to the cell's inner text
-        cell.textContent = samples[i].name;
-        cell.dataset.sampleIdx = samples[i].idx; // Add the sample's idx to the cell's dataset
-      }
-    }
-  </script>
-  <script>
-    function createWavFile(samples, sampleRate) {
-      const byteRate = sampleRate * 1;
-      const dataSize = samples.length;
-      const buffer = new ArrayBuffer(44 + dataSize);
-      const view = new DataView(buffer);
-
-      view.setUint32(0, 0x52494646, false);
-      view.setUint32(4, 36 + dataSize, true);
-      view.setUint32(8, 0x57415645, false);
-      view.setUint32(12, 0x666d7420, false);
-      view.setUint32(16, 16, true);
-      view.setUint16(20, 1, true);
-      view.setUint16(22, 1, true);
-      view.setUint32(24, sampleRate, true);
-      view.setUint32(28, byteRate, true);
-      view.setUint16(32, 1, true);
-      view.setUint16(34, 8, true);
-      view.setUint32(36, 0x64617461, false);
-      view.setUint32(40, dataSize, true);
-
-      for (let i = 0, stride = 44; i < dataSize; i++, stride++) {
-        view.setUint8(stride, samples[i]);
-      }
-
-      return buffer;
-    }
-
-    function hexStringToUint8Array(hexString) {
-      const numPairs = hexString.length / 2;
-      const uintArray = new Uint8Array(numPairs);
-
-      for (let i = 0; i < numPairs; i++) {
-        const hexPair = hexString.substr(i * 2, 2);
-        uintArray[i] = parseInt(hexPair, 16);
-      }
-
-      return uintArray;
-    }
-
-    const samples = hexStringToUint8Array(samplesStr);
-    const sampleRate = 8000;
-
-    console.log(samples);
-
-    const wavFile = createWavFile(samples, sampleRate);
-
-    const blob = new Blob([wavFile], { type: 'audio/wav' });
-    const url = URL.createObjectURL(blob);
-
-    const player = document.getElementById('player');
-    player.src = url;
-    player.play();
-
-    document.addEventListener('DOMContentLoaded', (event) => {
-      const updateButton = document.getElementById('update-btn');
-      console.log(updateButton);
-
-      updateButton.addEventListener('click', async function () {
-        if (connectedAccount == undefined) {
-          alert('Please connect your wallet first');
-        } else {
-          const txnHash = await ethereum.request({
-            method: 'eth_call',
-            params: [
-              {
-                from: connectedAccount,
-                to: CONTRACT,
-                data: '0x20c50d810000000000000000000000000000000000000000000000000000000000000001',
-              },
-            ],
-          });
-          console.log('txnHash', txnHash);
-        }
+        updateButton.addEventListener("click", async function () {
+          if (connectedAccount == undefined) {
+            alert("Please connect your wallet first");
+          } else {
+            const txnHash = await ethereum.request({
+              method: "eth_call",
+              params: [
+                {
+                  from: connectedAccount,
+                  to: CONTRACT,
+                  data: "0x20c50d810000000000000000000000000000000000000000000000000000000000000001",
+                },
+              ],
+            });
+            console.log("txnHash", txnHash);
+          }
+        });
       });
-    });
-  </script>
-  <script>
-    document.addEventListener('DOMContentLoaded', (event) => {
-      const updateButton = document.getElementById('update-btn');
-      console.log(updateButton);
-
-      updateButton.addEventListener('click', async function () {
-        if (connectedAccount == undefined) {
-          alert('Please connect your wallet first');
-        } else {
-          const txnHash = await ethereum.request({
-            method: 'eth_call',
-            params: [
-              {
-                from: connectedAccount,
-                to: CONTRACT,
-                data: '0x20c50d810000000000000000000000000000000000000000000000000000000000000001',
-              },
-            ],
-          });
-          console.log('txnHash', txnHash);
-        }
-      });
-    });
       //const mintButton = document.getElementById("mint-btn");
       // document.getElementById('mint-btn').addEventListener('click', async function () {
       //   if (connectedAccount == undefined) {
@@ -319,140 +326,147 @@
       //     }
       //   }
       // });
-  </script>
-  <style>
-    body {
-      font-family: 'Helvetica', sans-serif;
-    }
+    </script>
+    <style>
+      body {
+        font-family: "Helvetica", sans-serif;
+      }
 
-    .dot {
-      height: 10px;
-      width: 10px;
-      background-color: red;
-      border-radius: 50%;
-      margin-top: 10px;
-      margin-right: 5px;
-    }
+      .dot {
+        height: 10px;
+        width: 10px;
+        background-color: red;
+        border-radius: 50%;
+        margin-top: 10px;
+        margin-right: 5px;
+      }
 
-    .timeline {
-      width: 1200px;
-      margin: auto;
-    }
+      .timeline {
+        width: 1200px;
+        margin: auto;
+      }
 
-    td[class^='slot-'] {
-      background-color: #f0f0f0;
-      border: 1px solid #ccc;
-      width: 120px;
-      height: 40px;
-    }
+      td[class^="slot-"] {
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        width: 120px;
+        height: 40px;
+      }
 
-    .samples {
-      display: flex;
-      width: 1200px;
-    }
+      td[class^="slot-"]:hover {
+        background-color: #e0e0e0;
+        cursor: pointer;
+      }
 
-    td[class^='sample-'] {
-      background-color: #f0f0f0;
-      border: 1px solid #ccc;
-      width: 120px;
-      height: 40px;
-    }
+      .samples {
+        display: flex;
+        width: 1200px;
+      }
 
-    div[class^='track-'] {
-      display: grid;
-      grid-template-columns: repeat(10, 1fr);
-    }
+      td[class^="sample-"] {
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        width: 120px;
+        height: 40px;
+      }
 
-    .selected {
-      background-color: yellow !important;
-    }
+      div[class^="track-"] {
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);
+      }
 
-    .occupied {
-      background-color: lightgreen !important;
-    }
-  </style>
-</head>
+      .selected {
+        background-color: yellow !important;
+      }
 
-<body>
-  <div class="dot"></div>
-  <button class="connect-button">Connect Wallet</button>
-  <button class="switch-button">Switch Networks</button>
-  <div class="title">
-    <h1>Timeline</h1>
-  </div>
-  <table class="timeline">
-    <tr class="track-0">
-      <td class="slot-0"></td>
-      <td class="slot-1"></td>
-      <td class="slot-2"></td>
-      <td class="slot-3"></td>
-      <td class="slot-4"></td>
-      <td class="slot-5"></td>
-      <td class="slot-6"></td>
-      <td class="slot-7"></td>
-      <td class="slot-8"></td>
-      <td class="slot-9"></td>
-    </tr>
-    <tr class="track-1">
-      <td class="slot-0"></td>
-      <td class="slot-1"></td>
-      <td class="slot-2"></td>
-      <td class="slot-3"></td>
-      <td class="slot-4"></td>
-      <td class="slot-5"></td>
-      <td class="slot-6"></td>
-      <td class="slot-7"></td>
-      <td class="slot-8"></td>
-      <td class="slot-9"></td>
-    </tr>
-    <tr class="track-2">
-      <td class="slot-0"></td>
-      <td class="slot-1"></td>
-      <td class="slot-2"></td>
-      <td class="slot-3"></td>
-      <td class="slot-4"></td>
-      <td class="slot-5"></td>
-      <td class="slot-6"></td>
-      <td class="slot-7"></td>
-      <td class="slot-8"></td>
-      <td class="slot-9"></td>
-    </tr>
-    <tr class="track-3">
-      <td class="slot-0"></td>
-      <td class="slot-1"></td>
-      <td class="slot-2"></td>
-      <td class="slot-3"></td>
-      <td class="slot-4"></td>
-      <td class="slot-5"></td>
-      <td class="slot-6"></td>
-      <td class="slot-7"></td>
-      <td class="slot-8"></td>
-      <td class="slot-9"></td>
-    </tr>
-  </table>
+      .occupied {
+        background-color: lightgreen !important;
+      }
+    </style>
+  </head>
 
-  <div class="title">
-    <h1>Samples</h1>
-  </div>
-  <div class="description">
-    <p>Click on a sample to select it, then click on a slot on the timeline to assign it to that slot.</p>
-  </div>
-  <table class="samples">
-    <tr>
-      <td class="sample-0"></td>
-      <td class="sample-1"></td>
-      <td class="sample-2"></td>
-      <td class="sample-3"></td>
-      <td class="sample-4"></td>
-      <td class="sample-5"></td>
-      <td class="sample-6"></td>
-      <td class="sample-7"></td>
-      <td class="sample-8"></td>
-      <td class="sample-9"></td>
-    </tr>
-  </table>
+  <body>
+    <div class="dot"></div>
+    <button class="connect-button">Connect Wallet</button>
+    <button class="switch-button">Switch Networks</button>
+    <div class="title">
+      <h1>Timeline</h1>
+    </div>
+    <table class="timeline">
+      <tr class="track-0">
+        <td class="slot-0"></td>
+        <td class="slot-1"></td>
+        <td class="slot-2"></td>
+        <td class="slot-3"></td>
+        <td class="slot-4"></td>
+        <td class="slot-5"></td>
+        <td class="slot-6"></td>
+        <td class="slot-7"></td>
+        <td class="slot-8"></td>
+        <td class="slot-9"></td>
+      </tr>
+      <tr class="track-1">
+        <td class="slot-0"></td>
+        <td class="slot-1"></td>
+        <td class="slot-2"></td>
+        <td class="slot-3"></td>
+        <td class="slot-4"></td>
+        <td class="slot-5"></td>
+        <td class="slot-6"></td>
+        <td class="slot-7"></td>
+        <td class="slot-8"></td>
+        <td class="slot-9"></td>
+      </tr>
+      <tr class="track-2">
+        <td class="slot-0"></td>
+        <td class="slot-1"></td>
+        <td class="slot-2"></td>
+        <td class="slot-3"></td>
+        <td class="slot-4"></td>
+        <td class="slot-5"></td>
+        <td class="slot-6"></td>
+        <td class="slot-7"></td>
+        <td class="slot-8"></td>
+        <td class="slot-9"></td>
+      </tr>
+      <tr class="track-3">
+        <td class="slot-0"></td>
+        <td class="slot-1"></td>
+        <td class="slot-2"></td>
+        <td class="slot-3"></td>
+        <td class="slot-4"></td>
+        <td class="slot-5"></td>
+        <td class="slot-6"></td>
+        <td class="slot-7"></td>
+        <td class="slot-8"></td>
+        <td class="slot-9"></td>
+      </tr>
+    </table>
 
-  <button id="update-btn">Update</button>
-</body>
+    <div class="title">
+      <h1>Samples</h1>
+    </div>
+    <div class="description">
+      <p>
+        Click on a sample to select it, then click on a slot on the timeline to
+        assign it to that slot.
+      </p>
+    </div>
+    <table class="samples">
+      <tr>
+        <td class="sample-0"></td>
+        <td class="sample-1"></td>
+        <td class="sample-2"></td>
+        <td class="sample-3"></td>
+        <td class="sample-4"></td>
+        <td class="sample-5"></td>
+        <td class="sample-6"></td>
+        <td class="sample-7"></td>
+        <td class="sample-8"></td>
+        <td class="sample-9"></td>
+      </tr>
+    </table>
 
+    <button id="update-btn">Update</button>
+  </body>
 </html>

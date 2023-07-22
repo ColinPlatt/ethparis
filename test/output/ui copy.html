@@ -49,7 +49,23 @@
         border: 1px solid #ccc;
         width: 120px;
         height: 40px;
+        position: relative; /* This is important for the position of the pseudo-elements */
       }
+
+      td[class^="slot-"]:hover {
+        background-color: #e0e0e0;
+        cursor: pointer;
+      }
+
+      .editing {
+        content: "Edit"; /* This is the text that will be displayed */
+        background-color: yellow !important;
+      }
+
+      .samples.editing td {
+        cursor: pointer;
+      }
+
       .samples {
         width: 1200px;
         display: flex;
@@ -327,43 +343,43 @@
       }
       const payloads = [
         {
-          to: "0x8f12080a517ae6ba17a8b1e6cfb136e56f20ba57",
+          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
           data: "0x20c50d810000000000000000000000000000000000000000000000000000000000000001",
         },
         {
-          to: "0x8f12080a517ae6ba17a8b1e6cfb136e56f20ba57",
+          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
           data: "0x20c50d810000000000000000000000000000000000000000000000000000000000000002",
         },
         {
-          to: "0x8f12080a517ae6ba17a8b1e6cfb136e56f20ba57",
+          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
           data: "0x20c50d810000000000000000000000000000000000000000000000000000000000000003",
         },
         {
-          to: "0x8f12080a517ae6ba17a8b1e6cfb136e56f20ba57",
+          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
           data: "0x20c50d810000000000000000000000000000000000000000000000000000000000000004",
         },
         {
-          to: "0x8f12080a517ae6ba17a8b1e6cfb136e56f20ba57",
+          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
           data: "0x20c50d810000000000000000000000000000000000000000000000000000000000000005",
         },
         {
-          to: "0x8f12080a517ae6ba17a8b1e6cfb136e56f20ba57",
+          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
           data: "0x20c50d810000000000000000000000000000000000000000000000000000000000000006",
         },
         {
-          to: "0x8f12080a517ae6ba17a8b1e6cfb136e56f20ba57",
+          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
           data: "0x20c50d810000000000000000000000000000000000000000000000000000000000000007",
         },
         {
-          to: "0x8f12080a517ae6ba17a8b1e6cfb136e56f20ba57",
+          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
           data: "0x20c50d810000000000000000000000000000000000000000000000000000000000000008",
         },
         {
-          to: "0x8f12080a517ae6ba17a8b1e6cfb136e56f20ba57",
+          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
           data: "0x20c50d810000000000000000000000000000000000000000000000000000000000000009",
         },
         {
-          to: "0x8f12080a517ae6ba17a8b1e6cfb136e56f20ba57",
+          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
           data: "0x20c50d81000000000000000000000000000000000000000000000000000000000000000a",
         },
       ];
@@ -386,43 +402,43 @@
       }
       const name_payloads = [
         {
-          to: "0x8f12080a517ae6ba17a8b1e6cfb136e56f20ba57",
+          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
           data: "0x40d654e70000000000000000000000000000000000000000000000000000000000000001",
         },
         {
-          to: "0x8f12080a517ae6ba17a8b1e6cfb136e56f20ba57",
+          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
           data: "0x40d654e70000000000000000000000000000000000000000000000000000000000000002",
         },
         {
-          to: "0x8f12080a517ae6ba17a8b1e6cfb136e56f20ba57",
+          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
           data: "0x40d654e70000000000000000000000000000000000000000000000000000000000000003",
         },
         {
-          to: "0x8f12080a517ae6ba17a8b1e6cfb136e56f20ba57",
+          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
           data: "0x40d654e70000000000000000000000000000000000000000000000000000000000000004",
         },
         {
-          to: "0x8f12080a517ae6ba17a8b1e6cfb136e56f20ba57",
+          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
           data: "0x40d654e70000000000000000000000000000000000000000000000000000000000000005",
         },
         {
-          to: "0x8f12080a517ae6ba17a8b1e6cfb136e56f20ba57",
+          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
           data: "0x40d654e70000000000000000000000000000000000000000000000000000000000000006",
         },
         {
-          to: "0x8f12080a517ae6ba17a8b1e6cfb136e56f20ba57",
+          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
           data: "0x40d654e70000000000000000000000000000000000000000000000000000000000000007",
         },
         {
-          to: "0x8f12080a517ae6ba17a8b1e6cfb136e56f20ba57",
+          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
           data: "0x40d654e70000000000000000000000000000000000000000000000000000000000000008",
         },
         {
-          to: "0x8f12080a517ae6ba17a8b1e6cfb136e56f20ba57",
+          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
           data: "0x40d654e70000000000000000000000000000000000000000000000000000000000000009",
         },
         {
-          to: "0x8f12080a517ae6ba17a8b1e6cfb136e56f20ba57",
+          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
           data: "0x40d654e7000000000000000000000000000000000000000000000000000000000000000a",
         },
       ];
@@ -440,36 +456,27 @@
         }
         console.log(elementNames);
       }
-      const track_payloads = [
-        {
-          to: "0x8f12080a517ae6ba17a8b1e6cfb136e56f20ba57",
-          data: "0x07171c740000000000000000000000000000000000000000000000000000000000000000",
-        },
-        {
-          to: "0x8f12080a517ae6ba17a8b1e6cfb136e56f20ba57",
-          data: "0x07171c740000000000000000000000000000000000000000000000000000000000000001",
-        },
-      ];
-      let tracks_filled = [];
+      const track_payloads = {
+        to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
+        data: "0x07171c740000000000000000000000000000000000000000000000000000000000000000",
+      };
+      let tracks_filled;
+
       async function fetchTrackPayloads() {
-        for (let i = 0; i < track_payloads.length; i++) {
-          tracks_filled.push(
-            await ethereum.request({
-              method: "eth_call",
-              params: [track_payloads[i], "latest"],
-            })
-          );
-        }
-        console.log(tracks_filled);
+        tracks_filled = await ethereum.request({
+          method: "eth_call",
+          params: [track_payloads, "latest"],
+        });
+        console.log("tracks filled:", tracks_filled);
 
         const trackMatrix = [];
-        const track = tracks_filled[0].substr(2);
+        const track = tracks_filled.substr(2 + 128);
         console.log(track);
 
         for (let i = 0; i < track.length; i += 64) {
           trackMatrix.push(parseInt(track.slice(i, i + 64)));
         }
-        console.log(trackMatrix);
+        console.log("trackMatrix", trackMatrix);
 
         let matrix = [];
         for (let i = 0; i < trackMatrix.length; i += 4) {
@@ -483,19 +490,17 @@
           for (var j = 0; j < matrix[i].length; j++) {
             var slot = matrix[i][j];
             var chan = document.querySelector(".channel-" + j);
-            console.log(chan);
+
             var slotEl = chan.querySelector(".slot-" + i);
+            if (slot != 0) {
+              console.log(chan, slotEl);
+            }
             if (slot !== 0) {
-              slotEl.textContent = elementNames[slot];
+              slotEl.textContent = elementNames[slot - 1];
             }
           }
         }
       }
-
-      const partialupdate = {
-        to: "0x8f12080a517ae6ba17a8b1e6cfb136e56f20ba57",
-        data: "0xa196189f",
-      };
 
       function insertElementNames() {
         for (let i = 0; i < elementNames.length; i++) {
@@ -504,14 +509,119 @@
           td.appendChild(textNode);
         }
       }
+
       document.addEventListener("DOMContentLoaded", async (event) => {
-        const updateButton = document.getElementById("update-btn");
-        console.log(updateButton);
+        let elementId = undefined;
+        let slotId = undefined;
+        let channelId = undefined;
         await fetchPayloads();
         await fetchNamePayloads();
         await fetchTrackPayloads();
         insertElementNames();
+        editHandler();
+        updateHandler();
       });
+
+      // added this
+
+      function editHandler() {
+        let selectedTimeline;
+        let selectedSample;
+        let boardLocked = false;
+
+        // Attach click event to timeline td elements
+        document.querySelectorAll(".timeline td").forEach(function (td) {
+          td.addEventListener("click", function () {
+            console.log(boardLocked);
+            if (boardLocked) return;
+            if (selectedTimeline === this) {
+              this.classList.remove("editing");
+              document.querySelector(".samples").classList.remove("editing");
+              selectedTimeline = undefined;
+              return;
+            }
+            if (selectedTimeline) {
+              selectedTimeline.classList.remove("editing");
+            }
+            this.classList.add("editing");
+            selectedTimeline = this;
+            document.querySelector(".samples").classList.add("editing");
+            slotId = parseInt(this.className.split("-")[1]);
+            channelId = parseInt(this.parentNode.className.split("-")[1]);
+          });
+        });
+
+        // Attach click event to sample td elements
+        document.querySelectorAll(".samples td").forEach(function (td) {
+          td.addEventListener("click", function () {
+            // // Clear previous selection
+            // if (selectedSample) {
+            //   selectedSample.classList.remove("highlighted");
+            // }
+            // // Highlight the clicked td
+            // this.classList.add("highlighted");
+            // // Store the selected td
+            // selectedSample = this;
+            // // If a timeline td is selected, update it
+            if (selectedTimeline) {
+              // For now we'll just change its text content.
+              // In your real application, you'd do something more sophisticated.
+              elementId = parseInt(this.className.split("-")[1]) + 1;
+              selectedTimeline.textContent = this.textContent;
+              document.querySelector(".samples").classList.remove("editing");
+              boardLocked = true;
+            }
+          });
+        });
+      }
+      function updateHandler() {
+        function updateBuffer(int1, int2, int3, int4) {
+          const buffer = new ArrayBuffer(128); // Create a buffer of size 128 bytes
+          const view = new DataView(buffer);
+
+          // Write the integers to the buffer, 28 bytes offset from the start of each 32-byte word
+          view.setInt32(28, int1);
+          view.setInt32(60, int2);
+          view.setInt32(92, int3);
+          view.setInt32(124, int4);
+
+          // Return the hexadecimal string representation of the buffer
+          const uint8Array = new Uint8Array(buffer);
+          let hexString = Array.from(uint8Array)
+            .map((b) => ("00" + b.toString(16)).slice(-2))
+            .join("");
+
+          return hexString;
+        }
+
+        const updateButton = document.getElementById("update-btn");
+        updateButton.addEventListener("click", async function () {
+          const partialupdate = {
+            from: connectedAccount,
+            to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
+            data: "0x89370e2d",
+          };
+          partialupdate.data += updateBuffer(0, slotId, channelId, elementId);
+          console.log(partialupdate);
+          const txHash = await ethereum.request({
+            method: "eth_sendTransaction",
+            params: [partialupdate],
+          });
+          const receipt = await new Promise((resolve) => {
+            const interval = setInterval(async () => {
+              const receipt = await ethereum.request({
+                method: "eth_getTransactionReceipt",
+                params: [txHash],
+              });
+              if (receipt) {
+                clearInterval(interval);
+                resolve(receipt);
+              }
+            }, 5000);
+          });
+          if (receipt) location.reload();
+        });
+      }
     </script>
   </body>
 </html>

@@ -18,12 +18,14 @@ contract TrackURI {
         scripts = new TrackScripts(trackAddr);
     }
 
-    // this is our main entry point to return the full html
-    function renderUI() external view returns (string memory) {
+        // this is our main entry point to return the full html
+    function tokenURI(uint id) external view returns (string memory) {
         html memory page; // initializing a new HTML page
 
-        return _getPage(page);
+        return _getPage(page, id);
     }
+
+    
 
     function _writeHead(html memory _page) internal view {
         _page.meta(HTML.prop("charset", "UTF-8"));
@@ -38,13 +40,13 @@ contract TrackURI {
         trackBody.getBody(_page);
     }
 
-    function _getPage(html memory _page) internal view returns (string memory) {
+    function _getPage(html memory _page, uint _id) internal view returns (string memory) {
         _writeHead(_page);
         _page.style(trackCSS.getCSS());
 
         _writeBody(_page);
 
-        _page.script_(scripts.getScripts());
+        _page.script_(scripts.getScripts(_id));
 
         return (_page.read());
     }

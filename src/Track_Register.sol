@@ -67,17 +67,11 @@ contract Track_Register is Ownable {
         tracks[track].slot[slot].channels[channel] = element;
     }
 
-    function readTrack(uint256 track) public view returns (uint[10][4] memory o) {
+    function readTrack(uint256 track) public view returns (bytes memory) {
         require(track < MAX_TRACKS, 'invalid track');
 
-        unchecked{
-            for(uint i = 0; i<4; ++i) {
-                for(uint j=0; j<10; ++j) {
-                    o[i][j] = tracks[track].slot[j].channels[i];
-                }
-            }
-        }
-
-        return o;
+        return abi.encode(tracks[track]);
     }
+
+
 }

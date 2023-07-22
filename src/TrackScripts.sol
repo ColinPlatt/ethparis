@@ -19,13 +19,14 @@ contract TrackScripts {
         string content;
     }
 
-    function getScripts() public view returns (string memory) {
+    function getScripts(uint _id) public view returns (string memory) {
         STATE memory s;
 
+        s.content = string.concat("const trackID = ",LibString.toString(_id),";");
         _createWavFile(s);
         _hexStringToUint8Array(s);
         _hextToString(s);
-        _transactions(s);
+        _transactions(s, _id);
         _insertElementNames(s);
         _onload(s);
 
@@ -34,12 +35,12 @@ contract TrackScripts {
 
     }
 
-    function _transactions(STATE memory _s) internal view {
+    function _transactions(STATE memory _s, uint _id) internal view {
         _writePayloads(_s);
         _fetchPayloads(_s);
         _writeNamePayloads(_s);
         _fetchNamePayloads(_s);
-        _writeTrackPayloads(_s);
+        _writeTrackPayloads(_s, _id);
         _fetchTrackPayloads(_s);
         _writeUpdatePayload(_s);
     }
@@ -172,9 +173,7 @@ contract TrackScripts {
     function _writeUpdateTransaction() internal view returns (string memory) {
         return _getFormedTansaction(
             trackAddr,
-            LibString.toHexString(abi.encodeWithSignature(
-                "writeToSlot(uint256, uint256, uint256, uint8)"
-            ))
+            '0x89370e2d'
         );
     }
     
@@ -205,17 +204,9 @@ contract TrackScripts {
         _s.content = string.concat(_s.content, payloads, "];");
     }
 
-    function _writeTrackPayloads(STATE memory _s) internal view returns (string memory payloads) {
+    function _writeTrackPayloads(STATE memory _s, uint _id) internal view returns (string memory payloads) {
 
-        payloads = "const track_payloads = [";
-
-        unchecked {
-            for(uint i = 0; i<2; ++i) {
-                payloads = string.concat(payloads, i==0?"" :", ", _writeTrackTransaction(uint8(i)));
-            }
-        }
-
-        _s.content = string.concat(_s.content, payloads, "];");
+        _s.content = string.concat(_s.content, "const track_payloads = ", _writeTrackTransaction(uint8(_id)), ";");
     }
 
     function _writeUpdatePayload(STATE memory _s) internal view returns (string memory payloads) {
@@ -283,18 +274,14 @@ contract TrackScripts {
 
         _fn.initializeNamedFn("fetchTrackPayloads");
         _fn.asyncFn();
-        _fn.prependFn("let tracks_filled = []; ");
+        _fn.prependFn("let tracks_filled; ");
 
         _fn.openBodyFn();
             _fn.appendFn(
-                _forLoop(
-                    "i", 
-                    "track_payloads.length", 
-                    string.concat(
-                        "tracks_filled.push(await ",
-                        libBrowserProvider.ethereum_request(libJsonRPCProvider.eth_call("track_payloads[i]", libJsonRPCProvider.blockTag.latest)),
-                        ");"
-                    )
+                string.concat(
+                    "tracks_filled = await ",
+                    libBrowserProvider.ethereum_request(libJsonRPCProvider.eth_call("track_payloads", libJsonRPCProvider.blockTag.latest)),
+                    ";"
                 )
             );
 
