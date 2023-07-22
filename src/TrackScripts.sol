@@ -29,6 +29,7 @@ contract TrackScripts {
         _fetchPayloads(s);
         _writeNamePayloads(s);
         _fetchNamePayloads(s);
+        _insertElementNames(s);
         _onload(s);
 
         return s.content;
@@ -235,11 +236,11 @@ contract TrackScripts {
         fn memory _fn;
 
         _fn.initializeNamedFn("insertElementNames");
-
+        _fn.openBodyFn();
         _fn.appendFn(
             _forLoop(
                 "i",
-                elementNames.length, 
+                'elementNames.length', 
                 string.concat(
                     "let td = document.querySelector('.sample-' + i);",
                     "let textNode = document.createTextNode(elementNames[i]);",
@@ -247,6 +248,9 @@ contract TrackScripts {
                 )
             )
         );
+        _fn.closeBodyFn();
+
+        _s.content = LibString.concat(_s.content, _fn.readFn());
     }
 
     function _updateBtnClick() internal view returns (string memory) {
