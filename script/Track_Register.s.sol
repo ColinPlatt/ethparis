@@ -13,10 +13,9 @@ contract TrackScript is Script {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
 
         vm.startBroadcast(deployerPrivateKey);
-            registry = new Track_Register();
+        registry = new Track_Register();
         vm.stopBroadcast();
     }
 }
 
 //forge script script/Track_Register.s.sol:TrackScript --rpc-url $RPC_URL --broadcast --slow --verify -vvvv
-

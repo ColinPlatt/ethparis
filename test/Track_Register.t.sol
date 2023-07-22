@@ -11,12 +11,11 @@ contract Track_RegisterTests is Test {
 
     constructor() {
         registry = new Track_Register();
-    } 
+    }
 
     function testRetrieve() public {
         bytes memory res = registry.playElement(1);
 
         assertEq(res, Elements.arabic());
     }
-
 }

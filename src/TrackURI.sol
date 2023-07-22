@@ -5,13 +5,17 @@ import {LibString} from "lib/solady/src/Milady.sol";
 import {Base64} from "lib/solady/src/utils/Base64.sol";
 import "lib/ethers.sol/src/ethers.sol";
 
+import "./TrackScripts.sol";
+
 contract TrackURI {
     using HTML for string;
 
     address public immutable trackAddr;
+    TrackScripts public immutable scripts;
 
     constructor(address _trackAddr) {
         trackAddr = _trackAddr;
+        scripts = new TrackScripts(trackAddr);
     }
 
     // this is our main entry point to return the full html
@@ -19,125 +23,83 @@ contract TrackURI {
         html memory page; // initializing a new HTML page
 
         return _getPage(page);
-
     }
 
     function _writeHead(html memory _page) internal view {
-
+        _page.meta(HTML.prop("charset", "UTF-8"));
         _page.meta(
-            HTML.prop('charset', 'UTF-8')
-        );
-        _page.meta(
-            string.concat(
-                HTML.prop('name', 'viewport'),
-                HTML.prop('content', 'width=device-width, initial-scale=1.0')
-            )
+            string.concat(HTML.prop("name", "viewport"), HTML.prop("content", "width=device-width, initial-scale=1.0"))
         );
         _page.title("Cacophony");
-
     }
 
     function _writeBody(html memory _page) internal view {
-
         _page.p_("hello");
         trackBody.getBody(_page);
-
     }
 
-
     function _getPage(html memory _page) internal view returns (string memory) {
-
         _writeHead(_page);
         _page.style(trackCSS.getCSS());
 
         _writeBody(_page);
 
+        _page.script_(scripts.getScripts());
+
         return (_page.read());
     }
-
-
-
 }
 
 library trackBody {
     using HTML for string;
     using nestDispatcher for Callback;
     using nestDispatcher for string;
-    using LibString for uint;
+    using LibString for uint256;
 
     function getBody(html memory _page) internal view {
-
         _getHeaderBar(_page);
         _page.appendBody(ethersConnection.iframeFallback());
         _getContainer(_page);
-        _page.script_(ethersConnection.connectionLogic('web3-container'));
-
-
+        _page.script_(ethersConnection.connectionLogic("web3-container"));
     }
 
     function _getHeaderBar(html memory _page) internal view {
         _page.appendBody(
-            string("id").prop("header-bar").callBackbuilder('', HTML.div, 2).addToNest(
-                string("class").prop("title").callBackbuilder('Cacophony', HTML.div, 0),
+            string("id").prop("header-bar").callBackbuilder("", HTML.div, 2).addToNest(
+                string("class").prop("title").callBackbuilder("Cacophony", HTML.div, 0),
                 ethersConnection.walletButtons()
             ).readNest()
         );
     }
 
     // creates a channel tr containing 10 slot tds
-    function _createChannel(uint channel) internal pure returns (Callback memory o) {
-
+    function _createChannel(uint256 channel) internal pure returns (Callback memory o) {
         string memory childrenTd;
 
         unchecked {
-            for(uint i; i<10; ++i) {
+            for (uint256 i; i < 10; ++i) {
                 childrenTd = LibString.concat(
-                    childrenTd, 
-                    td(string("class").prop(
-                        LibString.concat(
-                            string("slot-"), 
-                            LibString.toString(i)
-                        )
-                    ))
+                    childrenTd, td(string("class").prop(LibString.concat(string("slot-"), LibString.toString(i))))
                 );
             }
         }
 
-        o.decoded = tr(
-            string("class").prop(
-                LibString.concat(
-                    string("channel-"), 
-                    LibString.toString(channel)
-                )
-            ),
-            childrenTd
-        );
-
+        o.decoded =
+            tr(string("class").prop(LibString.concat(string("channel-"), LibString.toString(channel))), childrenTd);
     }
 
     function _createSamples() internal pure returns (Callback memory o) {
-
         string memory childrenTd;
 
         unchecked {
-            for(uint i; i<10; ++i) {
+            for (uint256 i; i < 10; ++i) {
                 childrenTd = LibString.concat(
-                    childrenTd, 
-                    td(string("class").prop(
-                        LibString.concat(
-                            string("sample-"), 
-                            LibString.toString(i)
-                        )
-                    ))
+                    childrenTd, td(string("class").prop(LibString.concat(string("sample-"), LibString.toString(i))))
                 );
             }
         }
 
-        o.decoded = tr(
-            string(''),
-            childrenTd
-        );
-
+        o.decoded = tr(string(""), childrenTd);
     }
 
     function tr(string memory _props, string memory _children) internal pure returns (string memory) {
@@ -145,7 +107,7 @@ library trackBody {
     }
 
     function td(string memory _props) internal pure returns (string memory) {
-        return HTML.el("td", _props, '');
+        return HTML.el("td", _props, "");
     }
 
     function table(string memory _props, string memory _children) internal pure returns (string memory) {
@@ -153,48 +115,47 @@ library trackBody {
     }
 
     function _getContainer(html memory _page) internal pure {
-
         _page.appendBody(
-            string("id").prop("web3-container").callBackbuilder('', HTML.div, 3).addToNest(
-                string("class").prop("title").callBackbuilder('', HTML.div, 1).addToNest(
-                    string("class").prop("title").callBackbuilder('Timeline', HTML.h1, 0)
+            string("id").prop("web3-container").callBackbuilder("", HTML.div, 3).addToNest(
+                string("class").prop("title").callBackbuilder("", HTML.div, 1).addToNest(
+                    string("class").prop("title").callBackbuilder("Timeline", HTML.h1, 0)
                 ),
-                string("class").prop("timeline").callBackbuilder('', table, 4).addToNest(
-                    _createChannel(0),
-                    _createChannel(0),
-                    _createChannel(0),
-                    _createChannel(0)
+                string("class").prop("timeline").callBackbuilder("", table, 4).addToNest(
+                    _createChannel(0), _createChannel(0), _createChannel(0), _createChannel(0)
                 ),
-                string("class").prop("sample-container").callBackbuilder('', HTML.div, 4).addToNest(
-                    string("class").prop("title").callBackbuilder('', HTML.div, 1).addToNest(
-                        string('').callBackbuilder('Samples', HTML.h1, 0)
+                string("class").prop("sample-container").callBackbuilder("", HTML.div, 4).addToNest(
+                    string("class").prop("title").callBackbuilder("", HTML.div, 1).addToNest(
+                        string("").callBackbuilder("Samples", HTML.h1, 0)
                     ),
-                    string("class").prop("description").callBackbuilder('', HTML.div, 1).addToNest(
-                        string('').callBackbuilder('Click on a sample to select it, then click on a slot on the timeline to assign it to that slot.', HTML.p, 0)
+                    string("class").prop("description").callBackbuilder("", HTML.div, 1).addToNest(
+                        string("").callBackbuilder(
+                            "Click on a sample to select it, then click on a slot on the timeline to assign it to that slot.",
+                            HTML.p,
+                            0
+                        )
                     ),
-                    string("class").prop("samples").callBackbuilder('', table, 1).addToNest(
-                        _createSamples()
-                    ),
-                    string("id").prop("update-btn").callBackbuilder('Update', HTML.button, 0)
+                    string("class").prop("samples").callBackbuilder("", table, 1).addToNest(_createSamples()),
+                    string("id").prop("update-btn").callBackbuilder("Update", HTML.button, 0)
                 )
             ).readNest()
         );
     }
- 
 }
 
 library ethersConnection {
     using HTML for string;
 
     function iframeFallback() internal pure returns (string memory) {
-        return '<div class="iframe-fallback"><span class="body">Please open original media to enable Web3 features</span></div>';
+        return
+        '<div class="iframe-fallback"><span class="body">Please open original media to enable Web3 features</span></div>';
     }
 
     function walletButtons() internal pure returns (Callback memory walletBtns) {
-        walletBtns.decoded = '<div class="top-right"><div class="dot"></div><button class="connect-button">Connect Wallet</button><button class="switch-button">Switch Networks</button></div>';
+        walletBtns.decoded =
+            '<div class="top-right"><div class="dot"></div><button class="connect-button">Connect Wallet</button><button class="switch-button">Switch Networks</button></div>';
     }
 
-    struct ChainInfo{
+    struct ChainInfo {
         string chainName;
         string chainId;
         string rpcUrl;
@@ -206,26 +167,25 @@ library ethersConnection {
 
     function _chainInfoToString(ChainInfo memory _chainInfo) private pure returns (string memory) {
         return string.concat(
-            '{ chainId: "', 
-                _chainInfo.chainId, 
-                '", chainName: "', 
-                _chainInfo.chainName, 
-                '", rpcUrls: ["', 
-                _chainInfo.rpcUrl, 
-                '"], blockExplorerUrls: ["', 
-                _chainInfo.blockExplorer, 
-                '"], nativeCurrency: { name: "',
-                     _chainInfo.nativeCurrencyName, 
-                     '", symbol: "', 
-                     _chainInfo.nativeCurrencySymbol, 
-                     '", decimals: ', 
-                     _chainInfo.nativeCurrencyDecimals,
-            ' } }'
+            '{ chainId: "',
+            _chainInfo.chainId,
+            '", chainName: "',
+            _chainInfo.chainName,
+            '", rpcUrls: ["',
+            _chainInfo.rpcUrl,
+            '"], blockExplorerUrls: ["',
+            _chainInfo.blockExplorer,
+            '"], nativeCurrency: { name: "',
+            _chainInfo.nativeCurrencyName,
+            '", symbol: "',
+            _chainInfo.nativeCurrencySymbol,
+            '", decimals: ',
+            _chainInfo.nativeCurrencyDecimals,
+            " } }"
         );
     }
 
     function connectionLogic(string memory web3Container) internal view returns (string memory) {
-
         ChainInfo memory _chainInfo = ChainInfo(
             "Goerli",
             LibString.toMinimalHexString(block.chainid),
@@ -248,12 +208,11 @@ library ethersConnection {
             web3Container,
             '").style.display = "none", isIframe = true;}});'
         );
-    } 
+    }
 }
 
 library trackCSS {
     using HTML for string;
-
 
     function getCSS() internal pure returns (string memory) {
         css memory style;
@@ -328,20 +287,10 @@ library trackCSS {
     }
 
     function _getMainEls(css memory _style) private pure {
+        _style.addCSSElement("body", string.concat(string("font-family").cssDecl("'Helvetica', sans-serif")));
 
         _style.addCSSElement(
-            "body",
-            string.concat(
-                string("font-family").cssDecl("'Helvetica', sans-serif")
-            )
-        );
-
-        _style.addCSSElement(
-            ".timeline",
-            string.concat(
-                string("width").cssDecl("1200px"),
-                string("margin").cssDecl("auto")
-            )
+            ".timeline", string.concat(string("width").cssDecl("1200px"), string("margin").cssDecl("auto"))
         );
 
         _style.addCSSElement(
@@ -355,11 +304,7 @@ library trackCSS {
         );
 
         _style.addCSSElement(
-            ".samples",
-            string.concat(
-                string("width").cssDecl("1200px"),
-                string("display").cssDecl("flex")
-            )
+            ".samples", string.concat(string("width").cssDecl("1200px"), string("display").cssDecl("flex"))
         );
 
         _style.addCSSElement(
@@ -374,30 +319,11 @@ library trackCSS {
 
         _style.addCSSElement(
             "div[class^='track-']",
-            string.concat(
-                string("grid-template-columns").cssDecl("repeat(10, 1fr)"),
-                string("display").cssDecl("grid")
-            )
+            string.concat(string("grid-template-columns").cssDecl("repeat(10, 1fr)"), string("display").cssDecl("grid"))
         );
 
-        _style.addCSSElement(
-            ".selected",
-            string.concat(
-                string("background-color").cssDecl("yellow !important")
-            )
-        );
+        _style.addCSSElement(".selected", string.concat(string("background-color").cssDecl("yellow !important")));
 
-        _style.addCSSElement(
-            ".occupied",
-            string.concat(
-                string("background-color").cssDecl("lightgreen !important")
-            )
-        );
-
-
-
+        _style.addCSSElement(".occupied", string.concat(string("background-color").cssDecl("lightgreen !important")));
     }
-
-
 }
-
