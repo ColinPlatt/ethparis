@@ -40,6 +40,7 @@ contract TrackURI {
     function _writeBody(html memory _page) internal view {
 
         _page.p_("hello");
+        trackBody.getBody(_page);
 
     }
 
@@ -47,16 +48,116 @@ contract TrackURI {
     function _getPage(html memory _page) internal view returns (string memory) {
 
         _writeHead(_page);
-        _writeBody(_page);
-
         _page.style(trackCSS.getCSS());
 
+        _writeBody(_page);
 
         return (_page.read());
     }
 
 
 
+}
+
+library trackBody {
+    using HTML for string;
+    using nestDispatcher for Callback;
+    using nestDispatcher for string;
+
+    function getBody(html memory _page) internal view {
+
+        _getHeaderBar(_page);
+        _page.appendBody(ethersConnection.iframeFallback());
+        _getContainer(_page);
+        _page.script_(ethersConnection.connectionLogic('web3-container'));
+
+
+    }
+
+    function _getHeaderBar(html memory _page) internal view {
+        _page.appendBody(
+            string("id").prop("header-bar").callBackbuilder('', HTML.div, 2).addToNest(
+                string("class").prop("title").callBackbuilder('Cacophony', HTML.div, 0),
+                ethersConnection.walletButtons()
+            ).readNest()
+        );
+    }
+
+    function _getContainer(html memory _page) internal pure {
+
+        _page.appendBody(
+            string("id").prop("web3-container").callBackbuilder('', HTML.div, 0).readNest()
+        );
+    }
+ 
+}
+
+library ethersConnection {
+    using HTML for string;
+
+    function iframeFallback() internal pure returns (string memory) {
+        return '<div class="iframe-fallback"><span class="body">Please open original media to enable Web3 features</span></div>';
+    }
+
+    function walletButtons() internal pure returns (Callback memory walletBtns) {
+        walletBtns.decoded = '<div class="top-right"><div class="dot"></div><button class="connect-button">Connect Wallet</button><button class="switch-button">Switch Networks</button></div>';
+    }
+
+    struct ChainInfo{
+        string chainName;
+        string chainId;
+        string rpcUrl;
+        string blockExplorer;
+        string nativeCurrencyName;
+        string nativeCurrencySymbol;
+        string nativeCurrencyDecimals;
+    }
+
+    function _chainInfoToString(ChainInfo memory _chainInfo) private pure returns (string memory) {
+        return string.concat(
+            '{ chainId: "', 
+                _chainInfo.chainId, 
+                '", chainName: "', 
+                _chainInfo.chainName, 
+                '", rpcUrls: ["', 
+                _chainInfo.rpcUrl, 
+                '"], blockExplorerUrls: ["', 
+                _chainInfo.blockExplorer, 
+                '"], nativeCurrency: { name: "',
+                     _chainInfo.nativeCurrencyName, 
+                     '", symbol: "', 
+                     _chainInfo.nativeCurrencySymbol, 
+                     '", decimals: ', 
+                     _chainInfo.nativeCurrencyDecimals,
+            ' } }'
+        );
+    }
+
+    function connectionLogic(string memory web3Container) internal view returns (string memory) {
+
+        ChainInfo memory _chainInfo = ChainInfo(
+            "Goerli",
+            LibString.toMinimalHexString(block.chainid),
+            "https://eth-goerli.public.blastapi.io",
+            "https://goerli.etherscan.io/",
+            "ETH",
+            "ETH",
+            "18"
+        );
+
+        return string.concat(
+            'let isIframe; let provider; let accounts; let connectedAccount; function setDotColor(e) {document.querySelector(".dot").style.backgroundColor = e} document.addEventListener("DOMContentLoaded", function () {if (window == window.top) {provider = window.ethereum; isIframe = false; var e = document.getElementById("',
+            web3Container,
+            '", document.querySelector(".iframe-fallback").style.display = "none"),t = document.querySelector(".connect-button"), n = document.querySelector(".switch-button"); e.style.display = "block",',
+            'void 0 !== provider ? (window.ethereum.request({method: "eth_requestAccounts"}), ethereum.request({method: "eth_accounts"}).then(function (accounts) {accounts.length === 0 ? (setDotColor("red"), t.style.display = "block", n.style.display = "none") : ethereum.request({method: "eth_chainId"}).then(function (e) {if("',
+            _chainInfo.chainId,
+            '" === e) { (ethereum.enable().then(function (accounts) { setDotColor("green"); console.log(accounts); connectedAccount = accounts[0]; n.style.display = "none"; t.innerText = "Connected"; }).catch(console.error))} else {(setDotColor("red"), t.style.display = "none", n.style.display = "block")} }).catch(console.error)}).catch(console.error), t.addEventListener("click", function () {ethereum.request({method: "eth_requestAccounts"}).then(function (accounts) {if(accounts.length > 0) {setDotColor("green"); t.innerText = "Connected"; n.style.display = "none"; connectedAccount = accounts[0]; } else { ethereum.enable().then(function (accounts) { setDotColor("green"); console.log(accounts); connectedAccount = accounts[0]; n.style.display = "none"; t.innerText = "Connected";}).catch(console.error); } }).catch(console.error)}), n.addEventListener("click", function () {window.ethereum.request({ method: "wallet_addEthereumChain", params: [',
+            _chainInfoToString(_chainInfo),
+            ']}).then(function () {n.style.display = "none"; setDotColor("green")}).catch(console.error)})) : (setDotColor("red"), t.style.display = "block", n.style.display = "none")} else {document.querySelector(".iframe-fallback").style.display = "block"; document.getElementById("',
+            web3Container,
+            '").style.display = "none", isIframe = true;}});'
+        );
+    } 
 }
 
 library trackCSS {
@@ -79,7 +180,7 @@ library trackCSS {
                 string("font-size").cssDecl("1.5em"),
                 string("font-weight").cssDecl("600"),
                 string("font-family").cssDecl("inherit"),
-                string("color").cssDecl("#fff"),
+                string("color").cssDecl("#000"),
                 string("margin").cssDecl("0")
             )
         );

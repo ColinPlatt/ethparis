@@ -6,6 +6,6 @@ optimizer_runs = 10000
 solc = '0.8.19'
 fs_permissions = [{ access = "read-write", path = "./test/output"}]
 etherscan_api_key = "ETN335JB7JWHIXJR81T5DUZE232AZHRZ8G"
-chain_id = 59140
+chain_id = 5
 
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config
