@@ -17,6 +17,13 @@ contract URITest is Test {
         emit log_address(address(uri));
     }
 
+    function testUI() public {
+        string memory result = uri.renderUI();
+
+        vm.writeFile("test/output/ui.html", result);
+
+
+    }
 
 
 
