@@ -29,6 +29,7 @@ contract TrackScripts {
         _transactions(s, _id);
         _insertElementNames(s);
         _onload(s);
+        _handlers(s);
 
         return s.content;
 
@@ -42,7 +43,7 @@ contract TrackScripts {
         _fetchNamePayloads(_s);
         _writeTrackPayloads(_s, _id);
         _fetchTrackPayloads(_s);
-        _writeUpdatePayload(_s);
+        //_writeUpdatePayload(_s);
     }
 
     function _createWavFile(STATE memory _s) internal pure {
@@ -285,7 +286,7 @@ contract TrackScripts {
                 )
             );
 
-            _fn.appendFn("console.log('tracks filled:', tracks_filled); ");
+            _fn.appendFn('const trackMatrix = []; const track = tracks_filled.substr(2 + 128); console.log(track); for (let i = 0; i < track.length; i += 64) { trackMatrix.push(parseInt(track.slice(i, i + 64))); } let matrix = []; for (let i = 0; i < trackMatrix.length; i += 4) { const val = trackMatrix.slice(i, i + 4); matrix.push(val); } console.log(matrix); for (var i = 0; i < matrix.length; i++) { for (var j = 0; j < matrix[i].length; j++) { var slot = matrix[i][j]; var chan = document.querySelector(".channel-" + j); var slotEl = chan.querySelector(".slot-" + i); if (slot != 0) { console.log(chan, slotEl); } if (slot !== 0) { slotEl.textContent = elementNames[slot - 1]; } } }');
         _fn.closeBodyFn();
 
         _s.content = LibString.concat(_s.content, _fn.readFn());
@@ -337,13 +338,22 @@ contract TrackScripts {
         _fn.asyncArrowFn();
         _fn.prependArrowFn("document.addEventListener('DOMContentLoaded', ");
         _fn.openBodyArrowFn();
-        _fn.appendArrowFn("const updateButton = document.getElementById('update-btn'); console.log(updateButton);");
+        //_fn.appendArrowFn("const updateButton = document.getElementById('update-btn'); console.log(updateButton);");
+        _fn.appendArrowFn("let elementId = undefined; let slotId = undefined; let channelId = undefined;");
         _fn.appendArrowFn('await fetchPayloads(); await fetchNamePayloads(); await fetchTrackPayloads();');
-        _fn.appendArrowFn('insertElementNames();');
+        _fn.appendArrowFn('insertElementNames(); editHandler(); updateHandler();');
 
         _fn.appendArrowFn("});");
 
         _s.content = LibString.concat(_s.content, _fn.readArrowFn());
+    }
+
+    function _handlers(STATE memory _s) internal view {
+
+        string memory handlers = string.concat('function editHandler() { let selectedTimeline; let selectedSample; let boardLocked = false; document.querySelectorAll(".timeline td").forEach(function (td) { td.addEventListener("click", function () { console.log(boardLocked); if (boardLocked) return; if (selectedTimeline === this) { this.classList.remove("editing"); document.querySelector(".samples").classList.remove("editing"); selectedTimeline = undefined; return; } if (selectedTimeline) { selectedTimeline.classList.remove("editing"); } this.classList.add("editing"); selectedTimeline = this; document.querySelector(".samples").classList.add("editing"); slotId = parseInt(this.className.split("-")[1]); channelId = parseInt(this.parentNode.className.split("-")[1]); }); }); document.querySelectorAll(".samples td").forEach(function (td) { td.addEventListener("click", function () { if (selectedTimeline) { elementId = parseInt(this.className.split("-")[1]) + 1; selectedTimeline.textContent = this.textContent; document.querySelector(".samples").classList.remove("editing"); boardLocked = true; } }); }); } function updateHandler() { function updateBuffer(int1, int2, int3, int4) { const buffer = new ArrayBuffer(128); const view = new DataView(buffer); view.setInt32(28, int1); view.setInt32(60, int2); view.setInt32(92, int3); view.setInt32(124, int4); const uint8Array = new Uint8Array(buffer); let hexString = Array.from(uint8Array) .map((b) => ("00" + b.toString(16)).slice(-2)) .join(""); return hexString; } const updateButton = document.getElementById("update-btn"); updateButton.addEventListener("click", async function () { const partialupdate = { from: connectedAccount, to: "',LibString.toHexString(trackAddr),'", data: "0x89370e2d", }; partialupdate.data += updateBuffer(0, slotId, channelId, elementId); console.log(partialupdate); const txHash = await ethereum.request({ method: "eth_sendTransaction", params: [partialupdate], }); const receipt = await new Promise((resolve) => { const interval = setInterval(async () => { const receipt = await ethereum.request({ method: "eth_getTransactionReceipt", params: [txHash], }); if (receipt) { clearInterval(interval); resolve(receipt); } }, 5000); }); if (receipt) location.reload(); }); }');
+
+        _s.content = LibString.concat(_s.content, handlers);
+
     }
 
     function _forLoop(string memory _varName, string memory _length, string memory _body)

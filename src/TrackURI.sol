@@ -306,6 +306,24 @@ library trackCSS {
         );
 
         _style.addCSSElement(
+            "td[class^='slot-']:hover",
+            string.concat(
+                string("background-color").cssDecl("#e0e0e0"),
+                string("cursor").cssDecl("pointer")
+            )
+        );
+
+        _style.addCSSElement(
+            ".editing",
+            string("background-color").cssDecl("yellow !important")
+        );
+
+        _style.addCSSElement(
+            ".samples.editing td",
+            string("cursor").cssDecl("pointer")
+        );
+
+        _style.addCSSElement(
             ".samples", string.concat(string("width").cssDecl("1200px"), string("display").cssDecl("flex"))
         );
 

@@ -6,7 +6,7 @@ import "src/TrackURI.sol";
 import "src/Track_Register.sol";
 
 contract URITest is Test {
-    address constant trackaddr = 0xb0eCDA741150D8e975234684B59e44c20C86c2e5;
+    address constant trackaddr = 0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205;
     TrackURI public uri;
 
     constructor() {
