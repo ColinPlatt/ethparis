@@ -63,6 +63,7 @@ library trackBody {
     using HTML for string;
     using nestDispatcher for Callback;
     using nestDispatcher for string;
+    using LibString for uint;
 
     function getBody(html memory _page) internal view {
 
@@ -83,10 +84,100 @@ library trackBody {
         );
     }
 
+    // creates a channel tr containing 10 slot tds
+    function _createChannel(uint channel) internal pure returns (Callback memory o) {
+
+        string memory childrenTd;
+
+        unchecked {
+            for(uint i; i<10; ++i) {
+                childrenTd = LibString.concat(
+                    childrenTd, 
+                    td(string("class").prop(
+                        LibString.concat(
+                            string("slot-"), 
+                            LibString.toString(i)
+                        )
+                    ))
+                );
+            }
+        }
+
+        o.decoded = tr(
+            string("class").prop(
+                LibString.concat(
+                    string("channel-"), 
+                    LibString.toString(channel)
+                )
+            ),
+            childrenTd
+        );
+
+    }
+
+    function _createSamples() internal pure returns (Callback memory o) {
+
+        string memory childrenTd;
+
+        unchecked {
+            for(uint i; i<10; ++i) {
+                childrenTd = LibString.concat(
+                    childrenTd, 
+                    td(string("class").prop(
+                        LibString.concat(
+                            string("sample-"), 
+                            LibString.toString(i)
+                        )
+                    ))
+                );
+            }
+        }
+
+        o.decoded = tr(
+            string(''),
+            childrenTd
+        );
+
+    }
+
+    function tr(string memory _props, string memory _children) internal pure returns (string memory) {
+        return HTML.el("tr", _props, _children);
+    }
+
+    function td(string memory _props) internal pure returns (string memory) {
+        return HTML.el("td", _props, '');
+    }
+
+    function table(string memory _props, string memory _children) internal pure returns (string memory) {
+        return HTML.el("table", _props, _children);
+    }
+
     function _getContainer(html memory _page) internal pure {
 
         _page.appendBody(
-            string("id").prop("web3-container").callBackbuilder('', HTML.div, 0).readNest()
+            string("id").prop("web3-container").callBackbuilder('', HTML.div, 3).addToNest(
+                string("class").prop("title").callBackbuilder('', HTML.div, 1).addToNest(
+                    string("class").prop("title").callBackbuilder('Timeline', HTML.h1, 0)
+                ),
+                string("class").prop("timeline").callBackbuilder('', table, 4).addToNest(
+                    _createChannel(0),
+                    _createChannel(0),
+                    _createChannel(0),
+                    _createChannel(0)
+                ),
+                string("class").prop("sample-container").callBackbuilder('', HTML.div, 4).addToNest(
+                    string("class").prop("title").callBackbuilder('', HTML.div, 1).addToNest(
+                        string('').callBackbuilder('Samples', HTML.h1, 0)
+                    ),
+                    string("class").prop("description").callBackbuilder('', HTML.div, 1).addToNest(
+                        string('').callBackbuilder('Click on a sample to select it, then click on a slot on the timeline to assign it to that slot.', HTML.p, 0)
+                    ),
+                    string("class").prop("samples").callBackbuilder('', table, 1).addToNest(
+                        _createSamples()
+                    ),
+                    string("id").prop("update-btn").callBackbuilder('Update', HTML.button, 0)
+                )
+            ).readNest()
         );
     }
  
