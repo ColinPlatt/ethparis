@@ -24,7 +24,9 @@ contract TrackScripts {
 
         _createWavFile(s);
         _hexStringToUint8Array(s);
-        _callSamples(s);
+        //_callSamples(s);
+        _writePayloads(s);
+        _fetchPayloads(s);
         _onload(s);
 
         return s.content;
@@ -70,6 +72,7 @@ contract TrackScripts {
 
         _fn.initializeNamedArgsFn("hexStringToUint8Array", 'hexString');
         _fn.openBodyFn();
+        _fn.appendFn('hexString = hexString.substr(2);');
         _fn.appendFn('const numPairs = hexString.length / 2;');
         _fn.appendFn('const uintArray = new Uint8Array(numPairs);');
         _fn.appendFn(
@@ -94,7 +97,6 @@ contract TrackScripts {
     function _writeSampleTransaction(uint8 index) internal view returns (string memory) {
 
         return _getFormedTansaction(
-            'connectedAccount',
             trackAddr,
             LibString.toHexString(abi.encodeWithSignature(
                 "playElement(uint8)",
@@ -102,7 +104,46 @@ contract TrackScripts {
             ))
         );
 
+    }
 
+    function _writePayloads(STATE memory _s) internal view returns (string memory payloads) {
+
+        payloads = "const payloads = [";
+
+        unchecked {
+            for(uint i = 0; i<10; ++i) {
+                payloads = string.concat(payloads, i==0?"" :", ", _writeSampleTransaction(uint8(i+1)));
+            }
+        }
+
+        _s.content = string.concat(_s.content, payloads, "];");
+    }
+
+    function _fetchPayloads(STATE memory _s) internal view {
+
+        fn memory _fn;
+
+        _fn.initializeNamedFn("fetchPayloads");
+        _fn.asyncFn();
+        _fn.prependFn("let rawAudio = []; ");
+
+        _fn.openBodyFn();
+            _fn.appendFn(
+                _forLoop(
+                    "i", 
+                    "payloads.length", 
+                    string.concat(
+                        "rawAudio.push(createWavFile(hexStringToUint8Array(await ",
+                        libBrowserProvider.ethereum_request(libJsonRPCProvider.eth_call("payloads[i]", libJsonRPCProvider.blockTag.latest)),
+                        ",8000)))"
+                    )
+                )
+            );
+
+            _fn.appendFn("console.log(rawAudio); ");
+        _fn.closeBodyFn();
+
+        _s.content = LibString.concat(_s.content, _fn.readFn());
     }
 
     function _updateBtnClick() internal view returns (string memory) {
@@ -115,9 +156,7 @@ contract TrackScripts {
             _fn.appendFn(
                 string.concat(
                     'if (connectedAccount == undefined) {alert("Please connect your wallet first"); } else {',
-                    'const res = ',
-                    libBrowserProvider.ethereum_request(libJsonRPCProvider.eth_call(_writeSampleTransaction(uint8(1)), libJsonRPCProvider.blockTag.latest)),
-                    '; console.log("result", res);}'
+                    'await fetchPayloads();}'
                 )
             );
         _fn.appendFn("});");
@@ -129,10 +168,11 @@ contract TrackScripts {
         arrowFn memory _fn;
 
         _fn.initializeArgsArrowFn("event");
+        _fn.asyncArrowFn();
         _fn.prependArrowFn("document.addEventListener('DOMContentLoaded', ");
         _fn.openBodyArrowFn();
         _fn.appendArrowFn("const updateButton = document.getElementById('update-btn'); console.log(updateButton);");
-        _fn.appendArrowFn(_updateBtnClick());
+        _fn.appendArrowFn('await fetchPayloads();');
 
         _fn.appendArrowFn("});");
 
