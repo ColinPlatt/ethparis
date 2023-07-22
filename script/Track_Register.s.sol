@@ -13,7 +13,8 @@ contract TrackScript is Script {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
 
         vm.startBroadcast(deployerPrivateKey);
-        registry = new Track_Register();
+            registry = new Track_Register();
+            registry.writeToSlot(0, 6, 3, 4);
         vm.stopBroadcast();
     }
 }

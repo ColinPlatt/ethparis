@@ -60,7 +60,24 @@ contract Track_Register is Ownable {
         return (elements[idx].name, elements[idx].fn());
     }
 
+    uint public constant MAX_TRACKS = 2;
+
     function writeToSlot(uint256 track, uint256 slot, uint256 channel, uint8 element) public {
+        require(track < MAX_TRACKS, 'invalid track');
         tracks[track].slot[slot].channels[channel] = element;
+    }
+
+    function readTrack(uint256 track) public view returns (uint[10][4] memory o) {
+        require(track < MAX_TRACKS, 'invalid track');
+
+        unchecked{
+            for(uint i = 0; i<4; ++i) {
+                for(uint j=0; j<10; ++j) {
+                    o[i][j] = tracks[track].slot[j].channels[i];
+                }
+            }
+        }
+
+        return o;
     }
 }

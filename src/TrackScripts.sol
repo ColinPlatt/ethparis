@@ -25,16 +25,23 @@ contract TrackScripts {
         _createWavFile(s);
         _hexStringToUint8Array(s);
         _hextToString(s);
-        _writePayloads(s);
-        _fetchPayloads(s);
-        _writeNamePayloads(s);
-        _fetchNamePayloads(s);
+        _transactions(s);
         _insertElementNames(s);
         _onload(s);
 
         return s.content;
 
 
+    }
+
+    function _transactions(STATE memory _s) internal view {
+        _writePayloads(_s);
+        _fetchPayloads(_s);
+        _writeNamePayloads(_s);
+        _fetchNamePayloads(_s);
+        _writeTrackPayloads(_s);
+        _fetchTrackPayloads(_s);
+        _writeUpdatePayload(_s);
     }
 
     function _createWavFile(STATE memory _s) internal pure {
@@ -150,6 +157,26 @@ contract TrackScripts {
             ))
         );
     }
+
+    function _writeTrackTransaction(uint8 index) internal view returns (string memory) {
+        return _getFormedTansaction(
+            trackAddr,
+            LibString.toHexString(abi.encodeWithSignature(
+                "readTrack(uint256)",
+                index
+            ))
+        );
+    }
+
+    // this we just get the func sig and then need to assemble the rest
+    function _writeUpdateTransaction() internal view returns (string memory) {
+        return _getFormedTansaction(
+            trackAddr,
+            LibString.toHexString(abi.encodeWithSignature(
+                "writeToSlot(uint256, uint256, uint256, uint8)"
+            ))
+        );
+    }
     
 
     function _writePayloads(STATE memory _s) internal view returns (string memory payloads) {
@@ -176,6 +203,24 @@ contract TrackScripts {
         }
 
         _s.content = string.concat(_s.content, payloads, "];");
+    }
+
+    function _writeTrackPayloads(STATE memory _s) internal view returns (string memory payloads) {
+
+        payloads = "const track_payloads = [";
+
+        unchecked {
+            for(uint i = 0; i<2; ++i) {
+                payloads = string.concat(payloads, i==0?"" :", ", _writeTrackTransaction(uint8(i)));
+            }
+        }
+
+        _s.content = string.concat(_s.content, payloads, "];");
+    }
+
+    function _writeUpdatePayload(STATE memory _s) internal view returns (string memory payloads) {
+
+        _s.content = string.concat(_s.content, "const partialupdate = ", _writeUpdateTransaction(), ";");
     }
 
     function _fetchPayloads(STATE memory _s) internal view {
@@ -232,6 +277,33 @@ contract TrackScripts {
         _s.content = LibString.concat(_s.content, _fn.readFn());
     }
 
+    function _fetchTrackPayloads(STATE memory _s) internal view {
+
+        fn memory _fn;
+
+        _fn.initializeNamedFn("fetchTrackPayloads");
+        _fn.asyncFn();
+        _fn.prependFn("let tracks_filled = []; ");
+
+        _fn.openBodyFn();
+            _fn.appendFn(
+                _forLoop(
+                    "i", 
+                    "track_payloads.length", 
+                    string.concat(
+                        "tracks_filled.push(await ",
+                        libBrowserProvider.ethereum_request(libJsonRPCProvider.eth_call("track_payloads[i]", libJsonRPCProvider.blockTag.latest)),
+                        ");"
+                    )
+                )
+            );
+
+            _fn.appendFn("console.log('tracks filled:', tracks_filled); ");
+        _fn.closeBodyFn();
+
+        _s.content = LibString.concat(_s.content, _fn.readFn());
+    }
+
     function _insertElementNames(STATE memory _s)  internal view {
         fn memory _fn;
 
@@ -279,7 +351,7 @@ contract TrackScripts {
         _fn.prependArrowFn("document.addEventListener('DOMContentLoaded', ");
         _fn.openBodyArrowFn();
         _fn.appendArrowFn("const updateButton = document.getElementById('update-btn'); console.log(updateButton);");
-        _fn.appendArrowFn('await fetchPayloads(); await fetchNamePayloads();');
+        _fn.appendArrowFn('await fetchPayloads(); await fetchNamePayloads(); await fetchTrackPayloads();');
         _fn.appendArrowFn('insertElementNames();');
 
         _fn.appendArrowFn("});");

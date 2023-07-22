@@ -121,7 +121,7 @@ library trackBody {
                     string("class").prop("title").callBackbuilder("Timeline", HTML.h1, 0)
                 ),
                 string("class").prop("timeline").callBackbuilder("", table, 4).addToNest(
-                    _createChannel(0), _createChannel(0), _createChannel(0), _createChannel(0)
+                    _createChannel(0), _createChannel(1), _createChannel(2), _createChannel(3)
                 ),
                 string("class").prop("sample-container").callBackbuilder("", HTML.div, 4).addToNest(
                     string("class").prop("title").callBackbuilder("", HTML.div, 1).addToNest(
