@@ -18,6 +18,16 @@ contract ElementsTest is Test {
         _writeAsSite("drums", encodedWAV);
     }
 
+    function testsawTooth() public {
+        bytes memory res = Elements.industrial();
+
+        //emit log_named_bytes("drums fast", res);
+
+        string memory encodedWAV = res.encodeWAV(8000);
+        emit log_string(encodedWAV);
+        _writeAsSite("sawTooth", encodedWAV);
+    }
+
     function testDrumsFast() public {
         bytes memory res = Elements.drum_fast();
 

@@ -10,3 +10,6 @@
 [submodule "lib/ethers.sol"]
 	path = lib/ethers.sol
 	url = https://github.com/ColinPlatt/ethers.sol
+[submodule "lib/solmate"]
+	path = lib/solmate
+	url = https://github.com/Transmissions11/solmate

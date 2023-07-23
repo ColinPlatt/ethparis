@@ -7,6 +7,133 @@ library Elements {
     uint256 constant SAMPLE_RATE = 8000;
     uint256 constant LENGTH = 6;
 
+    function bassline0() internal pure returns (bytes memory) {
+        bytes memory buf = new bytes(SAMPLE_RATE*LENGTH);
+
+        unchecked {
+            for (uint256 t; t < (SAMPLE_RATE * LENGTH); ++t) {
+                buf[t] = bytes1(uint8(t / 20 << (t / 40)));
+            }
+        }
+
+        return buf;
+    }
+
+    function bassline1() internal pure returns (bytes memory) {
+        bytes memory buf = new bytes(SAMPLE_RATE*LENGTH);
+
+        unchecked {
+            for (uint256 t; t < (SAMPLE_RATE * LENGTH); ++t) {
+                buf[t] = bytes1(uint8(t / 20 | t ** (t % 10000 > 1000 ? 1: 0) & t >> 4));
+            }
+        }
+
+        return buf;
+    }
+
+    function drumkick0() internal pure returns (bytes memory) {
+        bytes memory buf = new bytes(SAMPLE_RATE*LENGTH);
+
+        unchecked {
+            for (uint256 t; t < (SAMPLE_RATE * LENGTH); ++t) {
+                buf[t] = bytes1(uint8(t / 20));
+            }
+        }
+
+        return buf;
+    }
+
+    function drumkick1() internal pure returns (bytes memory) {
+        bytes memory buf = new bytes(SAMPLE_RATE*LENGTH);
+
+        unchecked {
+            for (uint256 t; t < (SAMPLE_RATE * LENGTH); ++t) {
+                buf[t] = bytes1(uint8(t / 10));
+            }
+        }
+
+        return buf;
+    }
+
+    function techno() internal pure returns (bytes memory) {
+        bytes memory buf = new bytes(SAMPLE_RATE*LENGTH);
+
+        unchecked {
+            for (uint256 t; t < (SAMPLE_RATE * LENGTH); ++t) {
+                buf[t] = bytes1(uint8(t/20&100));
+            }
+        }
+
+        return buf;
+    }
+
+    function deadmau5() internal pure returns (bytes memory) {
+        bytes memory buf = new bytes(SAMPLE_RATE*LENGTH);
+
+        unchecked {
+            for (uint256 t; t < (SAMPLE_RATE * LENGTH); ++t) {
+                buf[t] = bytes1(uint8(t&128 | t&64 & t/20 ^ t/15));
+            }
+        }
+
+        return buf;
+    }
+
+    function danzfloor() internal pure returns (bytes memory) {
+        bytes memory buf = new bytes(SAMPLE_RATE*LENGTH);
+
+        unchecked {
+            for (uint256 t; t < (SAMPLE_RATE * LENGTH); ++t) {
+                buf[t] = bytes1(uint8((t*4|t|t>>3&t+t/4&t*12|t*8>>10|t/20&t+140)&t>>4));
+            }
+        }
+
+        return buf;
+    }
+
+    function industrial() internal pure returns (bytes memory) {
+        bytes memory buf = new bytes(SAMPLE_RATE*LENGTH);
+
+        unchecked {
+            for (uint256 t; t < (SAMPLE_RATE * LENGTH); ++t) {
+                buf[t] = bytes1(uint8(((t/4)>>(t/4))>>(t>>(t/8))|t>>2));
+            }
+        }
+
+        return buf;
+    }
+
+    function modulator() internal pure returns (bytes memory) {
+        bytes memory buf = new bytes(SAMPLE_RATE*LENGTH);
+
+        unchecked {
+            for (uint256 t; t < (SAMPLE_RATE * LENGTH); ++t) {
+                buf[t] = bytes1(uint8(t/20 | t&64));
+            }
+        }
+
+        return buf;
+    }
+
+    function arabic() internal pure returns (bytes memory) {
+        //t%((t&-16|t>>10)&42)<<2|t>>4
+        bytes memory buf = new bytes(SAMPLE_RATE*LENGTH);
+
+        uint256 u;
+
+        unchecked {
+            for (uint256 t; t < (SAMPLE_RATE * LENGTH); ++t) {
+                u = uint256(int256(t) & -int256(16)) | t >> 10 & 42;
+                buf[t] = bytes1(uint8(u == 0 ? 0 : t % u << 2 | t >> 4));
+            }
+        }
+
+        return buf;
+    }
+
+
+    /////////////////////////////////////
+
     function drum() internal pure returns (bytes memory) {
         bytes memory buf = new bytes(SAMPLE_RATE*LENGTH);
 
@@ -90,22 +217,6 @@ library Elements {
         unchecked {
             for (uint256 t; t < (SAMPLE_RATE * LENGTH); ++t) {
                 buf[t] = bytes1(uint8((t >> 4) * (t >> 3) | t >> 3));
-            }
-        }
-
-        return buf;
-    }
-
-    function arabic() internal pure returns (bytes memory) {
-        //t%((t&-16|t>>10)&42)<<2|t>>4
-        bytes memory buf = new bytes(SAMPLE_RATE*LENGTH);
-
-        uint256 u;
-
-        unchecked {
-            for (uint256 t; t < (SAMPLE_RATE * LENGTH); ++t) {
-                u = uint256(int256(t) & -int256(16)) | t >> 10 & 42;
-                buf[t] = bytes1(uint8(u == 0 ? 0 : t % u << 2 | t >> 4));
             }
         }
 

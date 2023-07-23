@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cacophony</title>
+    <title>On-chain Music Doodle Boards</title>
     <style>
       .title {
         font-size: 1.5em;
@@ -18,10 +18,8 @@
         align-items: center;
         padding: 5px;
         height: 35px;
-        position: fixed;
         top: 0;
         width: 100%;
-        z-index: 999;
       }
       .top-right {
         display: flex;
@@ -34,38 +32,34 @@
         width: 10px;
         background-color: red;
         border-radius: 50%;
-        margin-top: 10px;
         margin-right: 5px;
       }
       body {
-        font-family: "Helvetica", sans-serif;
+        font-family: monospace;
+        background-color: rgb(155, 227, 255);
       }
       .timeline {
         width: 1200px;
         margin: auto;
+        background-color: darkgray;
+        box-shadow: 2px 2px 21px -5px #000000;
       }
       td[class^="slot-"] {
         background-color: #f0f0f0;
         border: 1px solid #ccc;
         width: 120px;
         height: 40px;
-        position: relative; /* This is important for the position of the pseudo-elements */
       }
-
       td[class^="slot-"]:hover {
         background-color: #e0e0e0;
         cursor: pointer;
       }
-
       .editing {
-        content: "Edit"; /* This is the text that will be displayed */
         background-color: yellow !important;
       }
-
       .samples.editing td {
         cursor: pointer;
       }
-
       .samples {
         width: 1200px;
         display: flex;
@@ -86,12 +80,55 @@
       .occupied {
         background-color: lightgreen !important;
       }
+      @keyframes blink {
+        0% {
+          background: rgba(182, 199, 183, 0.5);
+        }
+        50% {
+          background: rgba(91, 206, 100, 0.5);
+        }
+        100% {
+          background: rgba(182, 199, 183, 0.5);
+        }
+      }
+      .timeline td {
+        position: relative;
+      }
+      .timeline td.blink::before {
+        content: "";
+        display: block;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        z-index: 1;
+        animation: blink 0.5s linear infinite;
+      }
+      .controls {
+        display: flex;
+        padding: 2em;
+        gap: 104px;
+        justify-content: center;
+        align-items: center;
+      }
+      button {
+        background-color: aliceblue;
+        border: 1px solid darkgrey;
+        margin: 16px;
+        width: 100px;
+        height: 34px;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      table {
+        text-align: center;
+      }
     </style>
   </head>
   <body>
-    <p>hello</p>
     <div id="header-bar">
-      <div class="title">Cacophony</div>
+      <h2>On-chain Music Doodle Boards</h2>
       <div class="top-right">
         <div class="dot"></div>
         <button class="connect-button">Connect Wallet</button
@@ -104,7 +141,14 @@
       >
     </div>
     <div id="web3-container">
-      <div class="title"><h1 class="title">Timeline</h1></div>
+      <div>
+        <h2>Track 0xc43268695ae271a327954dca2f4cf929a5cca82c</h2>
+        <div class="description">
+          <p>
+            Click on box to select it, then on a sample to apply it to that box
+          </p>
+        </div>
+      </div>
       <table class="timeline">
         <tr class="channel-0">
           <td class="slot-0"></td>
@@ -155,14 +199,12 @@
           <td class="slot-9"></td>
         </tr>
       </table>
+      <div class="controls">
+        <button id="update-btn">Update</button
+        ><audio id="player" controls loop></audio>
+      </div>
       <div class="sample-container">
-        <div class="title"><h1>Samples</h1></div>
-        <div class="description">
-          <p>
-            Click on a sample to select it, then click on a slot on the timeline
-            to assign it to that slot.
-          </p>
-        </div>
+        <h2>Samples</h2>
         <table class="samples">
           <tr>
             <td class="sample-0"></td>
@@ -177,7 +219,6 @@
             <td class="sample-9"></td>
           </tr>
         </table>
-        <button id="update-btn">Update</button>
       </div>
     </div>
     <script>
@@ -291,6 +332,7 @@
       });
     </script>
     <script>
+      const trackID = 0;
       function createWavFile(samples, sameRate) {
         const byteRate = sameRate * 1;
         const dataSize = samples.length;
@@ -343,43 +385,43 @@
       }
       const payloads = [
         {
-          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
+          to: "0xc43268695ae271a327954dca2f4cf929a5cca82c",
           data: "0x20c50d810000000000000000000000000000000000000000000000000000000000000001",
         },
         {
-          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
+          to: "0xc43268695ae271a327954dca2f4cf929a5cca82c",
           data: "0x20c50d810000000000000000000000000000000000000000000000000000000000000002",
         },
         {
-          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
+          to: "0xc43268695ae271a327954dca2f4cf929a5cca82c",
           data: "0x20c50d810000000000000000000000000000000000000000000000000000000000000003",
         },
         {
-          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
+          to: "0xc43268695ae271a327954dca2f4cf929a5cca82c",
           data: "0x20c50d810000000000000000000000000000000000000000000000000000000000000004",
         },
         {
-          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
+          to: "0xc43268695ae271a327954dca2f4cf929a5cca82c",
           data: "0x20c50d810000000000000000000000000000000000000000000000000000000000000005",
         },
         {
-          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
+          to: "0xc43268695ae271a327954dca2f4cf929a5cca82c",
           data: "0x20c50d810000000000000000000000000000000000000000000000000000000000000006",
         },
         {
-          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
+          to: "0xc43268695ae271a327954dca2f4cf929a5cca82c",
           data: "0x20c50d810000000000000000000000000000000000000000000000000000000000000007",
         },
         {
-          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
+          to: "0xc43268695ae271a327954dca2f4cf929a5cca82c",
           data: "0x20c50d810000000000000000000000000000000000000000000000000000000000000008",
         },
         {
-          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
+          to: "0xc43268695ae271a327954dca2f4cf929a5cca82c",
           data: "0x20c50d810000000000000000000000000000000000000000000000000000000000000009",
         },
         {
-          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
+          to: "0xc43268695ae271a327954dca2f4cf929a5cca82c",
           data: "0x20c50d81000000000000000000000000000000000000000000000000000000000000000a",
         },
       ];
@@ -397,48 +439,49 @@
               )
             )
           );
+          console.log(payloads[i]);
         }
         console.log(rawAudio);
       }
       const name_payloads = [
         {
-          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
+          to: "0xc43268695ae271a327954dca2f4cf929a5cca82c",
           data: "0x40d654e70000000000000000000000000000000000000000000000000000000000000001",
         },
         {
-          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
+          to: "0xc43268695ae271a327954dca2f4cf929a5cca82c",
           data: "0x40d654e70000000000000000000000000000000000000000000000000000000000000002",
         },
         {
-          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
+          to: "0xc43268695ae271a327954dca2f4cf929a5cca82c",
           data: "0x40d654e70000000000000000000000000000000000000000000000000000000000000003",
         },
         {
-          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
+          to: "0xc43268695ae271a327954dca2f4cf929a5cca82c",
           data: "0x40d654e70000000000000000000000000000000000000000000000000000000000000004",
         },
         {
-          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
+          to: "0xc43268695ae271a327954dca2f4cf929a5cca82c",
           data: "0x40d654e70000000000000000000000000000000000000000000000000000000000000005",
         },
         {
-          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
+          to: "0xc43268695ae271a327954dca2f4cf929a5cca82c",
           data: "0x40d654e70000000000000000000000000000000000000000000000000000000000000006",
         },
         {
-          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
+          to: "0xc43268695ae271a327954dca2f4cf929a5cca82c",
           data: "0x40d654e70000000000000000000000000000000000000000000000000000000000000007",
         },
         {
-          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
+          to: "0xc43268695ae271a327954dca2f4cf929a5cca82c",
           data: "0x40d654e70000000000000000000000000000000000000000000000000000000000000008",
         },
         {
-          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
+          to: "0xc43268695ae271a327954dca2f4cf929a5cca82c",
           data: "0x40d654e70000000000000000000000000000000000000000000000000000000000000009",
         },
         {
-          to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
+          to: "0xc43268695ae271a327954dca2f4cf929a5cca82c",
           data: "0x40d654e7000000000000000000000000000000000000000000000000000000000000000a",
         },
       ];
@@ -457,51 +500,42 @@
         console.log(elementNames);
       }
       const track_payloads = {
-        to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
+        to: "0xc43268695ae271a327954dca2f4cf929a5cca82c",
         data: "0x07171c740000000000000000000000000000000000000000000000000000000000000000",
       };
       let tracks_filled;
-
       async function fetchTrackPayloads() {
         tracks_filled = await ethereum.request({
           method: "eth_call",
           params: [track_payloads, "latest"],
         });
-        console.log("tracks filled:", tracks_filled);
-
         const trackMatrix = [];
         const track = tracks_filled.substr(2 + 128);
         console.log(track);
-
         for (let i = 0; i < track.length; i += 64) {
           trackMatrix.push(parseInt(track.slice(i, i + 64)));
         }
-        console.log("trackMatrix", trackMatrix);
-
         let matrix = [];
         for (let i = 0; i < trackMatrix.length; i += 4) {
           const val = trackMatrix.slice(i, i + 4);
           matrix.push(val);
         }
-
         console.log(matrix);
-
         for (var i = 0; i < matrix.length; i++) {
           for (var j = 0; j < matrix[i].length; j++) {
             var slot = matrix[i][j];
             var chan = document.querySelector(".channel-" + j);
-
             var slotEl = chan.querySelector(".slot-" + i);
             if (slot != 0) {
               console.log(chan, slotEl);
             }
             if (slot !== 0) {
               slotEl.textContent = elementNames[slot - 1];
+              slotEl.dataset.index = slot - 1;
             }
           }
         }
       }
-
       function insertElementNames() {
         for (let i = 0; i < elementNames.length; i++) {
           let td = document.querySelector(".sample-" + i);
@@ -509,26 +543,23 @@
           td.appendChild(textNode);
         }
       }
-
       document.addEventListener("DOMContentLoaded", async (event) => {
         let elementId = undefined;
         let slotId = undefined;
         let channelId = undefined;
         await fetchPayloads();
+        console.log("here");
         await fetchNamePayloads();
         await fetchTrackPayloads();
         insertElementNames();
         editHandler();
         updateHandler();
+        playHandler();
       });
-
-      // added this
-
       function editHandler() {
         let selectedTimeline;
         let selectedSample;
         let boardLocked = false;
-
         document.querySelectorAll(".timeline td").forEach(function (td) {
           td.addEventListener("click", function () {
             console.log(boardLocked);
@@ -568,20 +599,17 @@
           view.setInt32(60, int2);
           view.setInt32(92, int3);
           view.setInt32(124, int4);
-
           const uint8Array = new Uint8Array(buffer);
           let hexString = Array.from(uint8Array)
             .map((b) => ("00" + b.toString(16)).slice(-2))
             .join("");
-
           return hexString;
         }
-
         const updateButton = document.getElementById("update-btn");
         updateButton.addEventListener("click", async function () {
           const partialupdate = {
             from: connectedAccount,
-            to: "0x2Fb2ba909F2D2B55c4A70AEaE54cFFba2cE72205",
+            to: "0xc43268695ae271a327954dca2f4cf929a5cca82c",
             data: "0x89370e2d",
           };
           partialupdate.data += updateBuffer(0, slotId, channelId, elementId);
@@ -604,6 +632,68 @@
           });
           if (receipt) location.reload();
         });
+      }
+      function playHandler() {
+        console.log(rawAudio);
+        let audioMatrix = [];
+        document.querySelectorAll(".timeline tr").forEach(function (tr) {
+          let channelAudio = [];
+          tr.querySelectorAll("td").forEach(function (td) {
+            const index = td.dataset.index;
+            const audio = index
+              ? rawAudio[index].slice(108)
+              : new ArrayBuffer(48000);
+            channelAudio.push(audio);
+          });
+          let totalLength = channelAudio.reduce(
+            (acc, buffer) => acc + buffer.byteLength,
+            0
+          );
+          let result = new Uint8Array(totalLength);
+          let offset = 0;
+          for (let buffer of channelAudio) {
+            result.set(new Uint8Array(buffer), offset);
+            offset += buffer.byteLength;
+          }
+          audioMatrix.push(result);
+          channelAudio = [];
+        });
+        console.log(audioMatrix);
+        let length = audioMatrix[0].length;
+        let result = new Uint8Array(length);
+        for (let i = 0; i < length; i++) {
+          let sum = audioMatrix.reduce((acc, arr) => acc + arr[i], 0);
+          result[i] = sum / 4;
+        }
+        let completedAudio = createWavFile(result, 8000);
+        console.log("x", completedAudio);
+        const blob = new Blob([completedAudio], { type: "audio/wav" });
+        const url = URL.createObjectURL(blob);
+        const player = document.getElementById("player");
+        player.src = url;
+        player.play();
+        var lastLoggedSecond = -1;
+        let currentColumn = 0;
+        let previousColumn;
+        function highlightCoumns() {
+          let newColumn = Math.floor(player.currentTime / 6);
+          if (previousColumn !== undefined) {
+            document
+              .querySelectorAll(`.timeline .slot-${previousColumn}`)
+              .forEach((td) => {
+                td.classList.remove("blink");
+              });
+          }
+          document
+            .querySelectorAll(`.timeline .slot-${newColumn}`)
+            .forEach((td) => {
+              td.classList.add("blink");
+            });
+          previousColumn = currentColumn;
+          currentColumn = newColumn;
+        }
+        highlightCoumns();
+        setInterval(highlightCoumns, 1000);
       }
     </script>
   </body>

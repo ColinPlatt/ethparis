@@ -4,7 +4,6 @@ pragma solidity 0.8.19;
 import {LibString} from "lib/solady/src/Milady.sol";
 import {Base64} from "lib/solady/src/utils/Base64.sol";
 import "lib/ethers.sol/src/ethers.sol";
-
 import "./TrackScripts.sol";
 
 contract TrackURI {
@@ -13,34 +12,42 @@ contract TrackURI {
     address public immutable trackAddr;
     TrackScripts public immutable scripts;
 
+    event Transfer(address indexed from, address indexed to, uint256 indexed id);
+
     constructor(address _trackAddr) {
         trackAddr = _trackAddr;
         scripts = new TrackScripts(trackAddr);
+        emit Transfer(address(0), msg.sender, 0);
+        emit Transfer(address(0), msg.sender, 1);
     }
 
-        // this is our main entry point to return the full html
-    function tokenURI(uint id) external view returns (string memory) {
+    // this is our main entry point to return the full html
+    function tokenURI(uint256 id) public view returns (string memory) {
+        html memory page; // initializing a new HTML page
+
+        return
+            json.formattedMetadataHTML("Onchain Music Doodle Boards", "Onchain Music Doodle Boards", _getPage(page, id));
+    }
+
+    function contractURI(uint256 id) external view returns (string memory) {
         html memory page; // initializing a new HTML page
 
         return _getPage(page, id);
     }
-
-    
 
     function _writeHead(html memory _page) internal view {
         _page.meta(HTML.prop("charset", "UTF-8"));
         _page.meta(
             string.concat(HTML.prop("name", "viewport"), HTML.prop("content", "width=device-width, initial-scale=1.0"))
         );
-        _page.title("Cacophony");
+        _page.title("On-chain Music Doodle Boards");
     }
 
     function _writeBody(html memory _page) internal view {
-        _page.p_("hello");
-        trackBody.getBody(_page);
+        trackBody.getBody(_page, trackAddr);
     }
 
-    function _getPage(html memory _page, uint _id) internal view returns (string memory) {
+    function _getPage(html memory _page, uint256 _id) internal view returns (string memory) {
         _writeHead(_page);
         _page.style(trackCSS.getCSS());
 
@@ -58,18 +65,17 @@ library trackBody {
     using nestDispatcher for string;
     using LibString for uint256;
 
-    function getBody(html memory _page) internal view {
+    function getBody(html memory _page, address _trackAddr) internal view {
         _getHeaderBar(_page);
         _page.appendBody(ethersConnection.iframeFallback());
-        _getContainer(_page);
+        _getContainer(_page, _trackAddr);
         _page.script_(ethersConnection.connectionLogic("web3-container"));
     }
 
     function _getHeaderBar(html memory _page) internal view {
         _page.appendBody(
             string("id").prop("header-bar").callBackbuilder("", HTML.div, 2).addToNest(
-                string("class").prop("title").callBackbuilder("Cacophony", HTML.div, 0),
-                ethersConnection.walletButtons()
+                string("").callBackbuilder("On-chain Music Doodle Boards", HTML.h2, 0), ethersConnection.walletButtons()
             ).readNest()
         );
     }
@@ -116,28 +122,31 @@ library trackBody {
         return HTML.el("table", _props, _children);
     }
 
-    function _getContainer(html memory _page) internal pure {
+    function audio(string memory _props, string memory _children) internal pure returns (string memory) {
+        return HTML.el("audio", _props, _children);
+    }
+
+    function _getContainer(html memory _page, address _trackAddr) internal pure {
         _page.appendBody(
-            string("id").prop("web3-container").callBackbuilder("", HTML.div, 3).addToNest(
-                string("class").prop("title").callBackbuilder("", HTML.div, 1).addToNest(
-                    string("class").prop("title").callBackbuilder("Timeline", HTML.h1, 0)
+            string("id").prop("web3-container").callBackbuilder("", HTML.div, 4).addToNest(
+                string("").callBackbuilder("", HTML.div, 2).addToNest(
+                    string("").callBackbuilder(string.concat("Track ", LibString.toHexString(_trackAddr)), HTML.h2, 0),
+                    string("class").prop("description").callBackbuilder("", HTML.div, 1).addToNest(
+                        string("").callBackbuilder(
+                            "Click on box to select it, then on a sample to apply it to that box", HTML.p, 0
+                        )
+                    )
                 ),
                 string("class").prop("timeline").callBackbuilder("", table, 4).addToNest(
                     _createChannel(0), _createChannel(1), _createChannel(2), _createChannel(3)
                 ),
-                string("class").prop("sample-container").callBackbuilder("", HTML.div, 4).addToNest(
-                    string("class").prop("title").callBackbuilder("", HTML.div, 1).addToNest(
-                        string("").callBackbuilder("Samples", HTML.h1, 0)
-                    ),
-                    string("class").prop("description").callBackbuilder("", HTML.div, 1).addToNest(
-                        string("").callBackbuilder(
-                            "Click on a sample to select it, then click on a slot on the timeline to assign it to that slot.",
-                            HTML.p,
-                            0
-                        )
-                    ),
-                    string("class").prop("samples").callBackbuilder("", table, 1).addToNest(_createSamples()),
-                    string("id").prop("update-btn").callBackbuilder("Update", HTML.button, 0)
+                string("class").prop("controls").callBackbuilder("", HTML.div, 2).addToNest(
+                    string("id").prop("update-btn").callBackbuilder("Update", HTML.button, 0),
+                    string.concat(string("id").prop("player"), " controls loop").callBackbuilder("", audio, 0)
+                ),
+                string("class").prop("sample-container").callBackbuilder("", HTML.div, 2).addToNest(
+                    string("").callBackbuilder("Samples", HTML.h2, 0),
+                    string("class").prop("samples").callBackbuilder("", table, 1).addToNest(_createSamples())
                 )
             ).readNest()
         );
@@ -247,10 +256,8 @@ library trackCSS {
                 string("align-items").cssDecl("center"),
                 string("padding").cssDecl("5px"),
                 string("height").cssDecl("35px"),
-                string("position").cssDecl("fixed"),
                 string("top").cssDecl("0"),
-                string("width").cssDecl("100%"),
-                string("z-index").cssDecl("999")
+                string("width").cssDecl("100%")
             )
         );
     }
@@ -275,7 +282,6 @@ library trackCSS {
                 string("width").cssDecl("10px"),
                 string("background-color").cssDecl("red"),
                 string("border-radius").cssDecl("50%"),
-                string("margin-top").cssDecl("10px"),
                 string("margin-right").cssDecl("5px")
             )
         );
@@ -289,10 +295,21 @@ library trackCSS {
     }
 
     function _getMainEls(css memory _style) private pure {
-        _style.addCSSElement("body", string.concat(string("font-family").cssDecl("'Helvetica', sans-serif")));
+        _style.addCSSElement(
+            "body",
+            string.concat(
+                string("font-family").cssDecl("monospace"), string("background-color").cssDecl("rgb(155, 227, 255)")
+            )
+        );
 
         _style.addCSSElement(
-            ".timeline", string.concat(string("width").cssDecl("1200px"), string("margin").cssDecl("auto"))
+            ".timeline",
+            string.concat(
+                string("width").cssDecl("1200px"),
+                string("margin").cssDecl("auto"),
+                string("background-color").cssDecl("darkgray"),
+                string("box-shadow").cssDecl("2px 2px 21px -5px #000000")
+            )
         );
 
         _style.addCSSElement(
@@ -307,21 +324,12 @@ library trackCSS {
 
         _style.addCSSElement(
             "td[class^='slot-']:hover",
-            string.concat(
-                string("background-color").cssDecl("#e0e0e0"),
-                string("cursor").cssDecl("pointer")
-            )
+            string.concat(string("background-color").cssDecl("#e0e0e0"), string("cursor").cssDecl("pointer"))
         );
 
-        _style.addCSSElement(
-            ".editing",
-            string("background-color").cssDecl("yellow !important")
-        );
+        _style.addCSSElement(".editing", string("background-color").cssDecl("yellow !important"));
 
-        _style.addCSSElement(
-            ".samples.editing td",
-            string("cursor").cssDecl("pointer")
-        );
+        _style.addCSSElement(".samples.editing td", string("cursor").cssDecl("pointer"));
 
         _style.addCSSElement(
             ".samples", string.concat(string("width").cssDecl("1200px"), string("display").cssDecl("flex"))
@@ -345,5 +353,47 @@ library trackCSS {
         _style.addCSSElement(".selected", string.concat(string("background-color").cssDecl("yellow !important")));
 
         _style.addCSSElement(".occupied", string.concat(string("background-color").cssDecl("lightgreen !important")));
+
+        _style.addCSSElement(
+            "@keyframes blink",
+            string.concat(
+                string.concat("0% {", string("background").cssDecl("rgba(182, 199, 183, 0.5)"), "}"),
+                string.concat("50% {", string("background").cssDecl("rgba(91, 206, 100, 0.5)"), "}"),
+                string.concat("100% {", string("background").cssDecl("rgba(182, 199, 183, 0.5)"), "}")
+            )
+        );
+
+        _style.addCSSElement(".timeline td", string("position").cssDecl("relative"));
+
+        _style.addCSSElement(
+            ".timeline td.blink::before",
+            'content: ""; display: block; position: absolute; top: 0; bottom: 0; right: 0; left: 0; z-index: 1; animation: blink 0.5s linear infinite;'
+        );
+
+        _style.addCSSElement(
+            ".controls",
+            string.concat(
+                string("display").cssDecl("flex"),
+                string("padding").cssDecl("2em"),
+                string("gap").cssDecl("104px"),
+                string("justify-content").cssDecl("center"),
+                string("align-items").cssDecl("center")
+            )
+        );
+
+        _style.addCSSElement(
+            "button",
+            string.concat(
+                string("background-color").cssDecl("aliceblue"),
+                string("border").cssDecl("1px solid darkgrey"),
+                string("margin").cssDecl("16px"),
+                string("width").cssDecl("100px"),
+                string("height").cssDecl("34px"),
+                string("cursor").cssDecl("pointer"),
+                string("font-family").cssDecl("inherit")
+            )
+        );
+
+        _style.addCSSElement("table", string("text-align").cssDecl("center"));
     }
 }

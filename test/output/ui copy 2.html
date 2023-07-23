@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cacophony</title>
+    <title>On-chain Music Doodle Boards</title>
     <style>
       .title {
         font-size: 1.5em;
@@ -18,10 +18,8 @@
         align-items: center;
         padding: 5px;
         height: 35px;
-        position: fixed;
         top: 0;
         width: 100%;
-        z-index: 999;
       }
       .top-right {
         display: flex;
@@ -34,11 +32,11 @@
         width: 10px;
         background-color: red;
         border-radius: 50%;
-        margin-top: 10px;
         margin-right: 5px;
       }
       body {
-        font-family: "Helvetica", sans-serif;
+        font-family: monospace;
+        background-color: rgb(155, 227, 255);
       }
       .timeline {
         width: 1200px;
@@ -80,12 +78,66 @@
       .occupied {
         background-color: lightgreen !important;
       }
+      @keyframes blink {
+        0% {
+          background: rgba(182, 199, 183, 0.5);
+        }
+        50% {
+          background: rgba(91, 206, 100, 0.5);
+        }
+        100% {
+          background: rgba(182, 199, 183, 0.5);
+        }
+      }
+      .timeline td {
+        position: relative;
+      }
+      .timeline td.blink::before {
+        content: "";
+        display: block;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        z-index: 1;
+        animation: blink 0.5s linear infinite;
+      }
+      .controls {
+        display: flex;
+        padding: 2em;
+        gap: 104px;
+        justify-content: center;
+        align-items: center;
+      }
+      #update-btn {
+        width: 130px;
+        height: 40px;
+      }
+
+      button {
+        background-color: aliceblue;
+        border: 1px solid darkgrey;
+        height: 34px;
+        width: 100px;
+        margin: 16px;
+        cursor: pointer;
+        font-family: inherit;
+      }
+
+      .timeline {
+        background-color: darkgray;
+        box-shadow: 2px 2px 21px -5px #000000;
+      }
+
+      table {
+        text-align: center;
+      }
     </style>
   </head>
   <body>
-    <p>hello</p>
     <div id="header-bar">
-      <div class="title">Cacophony</div>
+      <h2>On-chain Music Doodle Boards</h2>
       <div class="top-right">
         <div class="dot"></div>
         <button class="connect-button">Connect Wallet</button
@@ -98,7 +150,14 @@
       >
     </div>
     <div id="web3-container">
-      <div class="title"><h1 class="title">Timeline</h1></div>
+      <div>
+        <h2>Track</h2>
+        <div class="description">
+          <p>
+            Click on box to select it, then on a sample to apply it to that box
+          </p>
+        </div>
+      </div>
       <table class="timeline">
         <tr class="channel-0">
           <td class="slot-0"></td>
@@ -149,15 +208,12 @@
           <td class="slot-9"></td>
         </tr>
       </table>
-      <button id="play-btn">Play</button>
+      <div class="controls">
+        <button id="update-btn">Update</button
+        ><audio id="player" controls loop></audio>
+      </div>
       <div class="sample-container">
-        <div class="title"><h1>Samples</h1></div>
-        <div class="description">
-          <p>
-            Click on a sample to select it, then click on a slot on the timeline
-            to assign it to that slot.
-          </p>
-        </div>
+        <h2>Samples</h2>
         <table class="samples">
           <tr>
             <td class="sample-0"></td>
@@ -172,7 +228,6 @@
             <td class="sample-9"></td>
           </tr>
         </table>
-        <button id="update-btn">Update</button>
       </div>
     </div>
     <script>
@@ -586,22 +641,66 @@
         });
       }
       function playHandler() {
-        const playButton = document.getElementById("play-btn");
-        playButton.addEventListener("click", function () {
-          console.log(rawAudio);
-          let audioMatrix = [];
-          document.querySelectorAll(".timeline tr").forEach(function (tr) {
-            let channelAudio = [];
-            tr.querySelectorAll("td").forEach(function (td) {
-              const index = td.dataset.index;
-              const audio = index ? rawAudio[index] : new ArrayBuffer(48000);
-              channelAudio.push(audio);
-            });
-            audioMatrix.push(channelAudio);
-            channelAudio = [];
+        console.log(rawAudio);
+        let audioMatrix = [];
+        document.querySelectorAll(".timeline tr").forEach(function (tr) {
+          let channelAudio = [];
+          tr.querySelectorAll("td").forEach(function (td) {
+            const index = td.dataset.index;
+            const audio = index
+              ? rawAudio[index].slice(108)
+              : new ArrayBuffer(48000);
+            channelAudio.push(audio);
           });
-          console.log(audioMatrix);
+          let totalLength = channelAudio.reduce(
+            (acc, buffer) => acc + buffer.byteLength,
+            0
+          );
+          let result = new Uint8Array(totalLength);
+          let offset = 0;
+          for (let buffer of channelAudio) {
+            result.set(new Uint8Array(buffer), offset);
+            offset += buffer.byteLength;
+          }
+          audioMatrix.push(result);
+          channelAudio = [];
         });
+        console.log(audioMatrix);
+        let length = audioMatrix[0].length;
+        let result = new Uint8Array(length);
+        for (let i = 0; i < length; i++) {
+          let sum = audioMatrix.reduce((acc, arr) => acc + arr[i], 0);
+          result[i] = sum / 4;
+        }
+        let completedAudio = createWavFile(result, 8000);
+        console.log("x", completedAudio);
+        const blob = new Blob([completedAudio], { type: "audio/wav" });
+        const url = URL.createObjectURL(blob);
+        const player = document.getElementById("player");
+        player.src = url;
+        player.play();
+        var lastLoggedSecond = -1;
+        let currentColumn = 0;
+        let previousColumn;
+        function highlightCoumns() {
+          let newColumn = Math.floor(player.currentTime / 6);
+          if (previousColumn !== undefined) {
+            document
+              .querySelectorAll(`.timeline .slot-${previousColumn}`)
+              .forEach((td) => {
+                td.classList.remove("blink");
+              });
+          }
+          document
+            .querySelectorAll(`.timeline .slot-${newColumn}`)
+            .forEach((td) => {
+              td.classList.add("blink");
+            });
+          previousColumn = currentColumn;
+          currentColumn = newColumn;
+        }
+        highlightCoumns();
+        setInterval(highlightCoumns, 1000);
       }
     </script>
   </body>

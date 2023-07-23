@@ -17,7 +17,7 @@ contract URITest is Test {
         Track_Register registry;
         registry = new Track_Register();
         registry.writeToSlot(0, 6, 3, 4);
-        emit log_bytes(abi.encode(0,6,3,4));
+        emit log_bytes(abi.encode(0, 6, 3, 4));
 
         emit log_address(address(uri));
         bytes memory track = registry.readTrack(0);
@@ -28,7 +28,7 @@ contract URITest is Test {
     }
 
     function testUI() public {
-        string memory result = uri.tokenURI(0);
+        string memory result = uri.contractURI(0);
 
         vm.writeFile("test/output/ui.html", result);
     }

@@ -2,7 +2,7 @@
 src = "src"
 out = "out"
 libs = ["lib"]
-optimizer_runs = 10000
+optimizer_runs = 1000
 solc = '0.8.19'
 fs_permissions = [{ access = "read-write", path = "./test/output"}]
 etherscan_api_key = "ETN335JB7JWHIXJR81T5DUZE232AZHRZ8G"
